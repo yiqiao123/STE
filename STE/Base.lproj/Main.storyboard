@@ -9,8 +9,8 @@
             <objects>
                 <viewController id="9pv-A4-QxB" customClass="FirstViewController" sceneMemberID="viewController">
                     <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="DXe-sH-Xl7"/>
-                        <viewControllerLayoutGuide type="bottom" id="twQ-5W-VmC"/>
+                        <viewControllerLayoutGuide type="top" id="O63-cu-YXc"/>
+                        <viewControllerLayoutGuide type="bottom" id="aBb-3I-ULh"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="tsR-hK-woN">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
@@ -43,8 +43,8 @@
             <objects>
                 <viewController id="8rJ-Kc-sve" customClass="SecondViewController" sceneMemberID="viewController">
                     <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="6x9-OT-7nw"/>
-                        <viewControllerLayoutGuide type="bottom" id="SGW-af-gBa"/>
+                        <viewControllerLayoutGuide type="top" id="12Y-wB-B15"/>
+                        <viewControllerLayoutGuide type="bottom" id="ujX-ya-mDn"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="QS5-Rx-YEW">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
