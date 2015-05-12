@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>chapter_name</key>
+		<string>第一章 证券交易概述</string>
+		<key>sections</key>
+		<array>
+			<dict>
+				<key>section_name</key>
+				<string>第一节 证券交易的概念、基本要素和交易机制</string>
+				<key>questions</key>
+				<array>
+					<dict>
+						<key>question_type</key>
+						<string>1</string>
+						<key>question_content</key>
+						<string>(    )4月底，我国开始启动股权分置改革试点工作。[2010年5月真题]</string>
+						<key>question_choice</key>
+						<array>
+							<string>1990年</string>
+							<string>2000年</string>
+							<string>2005年</string>
+							<string>2007年</string>
+						</array>
+						<key>question_answer</key>
+						<string>C</string>
+						<key>question_description</key>
+						<string>2005年4月底，我国开始启动股权分置改革试点工作。这是一项完善证券市场基础制度和运行机制的改革，它不仅在于解决历史问题，更在于为资本市场其他各项改革和制度创新创造条件。</string>
+					</dict>
+					<dict>
+						<key>question_type</key>
+						<string>2</string>
+						<key>question_content</key>
+						<string>我国证券登记结算公司具体负责(    )。[2010年5月真题]</string>
+						<key>question_choice</key>
+						<array>
+							<string>上市证券和资金的交易的清算和交收</string>
+							<string>记名证券的存管和过户</string>
+							<string>结算账户的设立</string>
+							<string>证券账户的设立</string>
+						</array>
+						<key>question_answer</key>
+						<string>ABCD</string>
+						<key>question_description</key>
+						<string>证券登记结算机构应履行下列职能：①证券账户、结算账户的设立和管理；②证券的存管和过户；③证券持有人名册登记及权益登记；④证券和资金的清算交收及相关管理；⑤受发行人的委托派发证券权益；⑥依法提供与证券登记结算业务有关的查询、信息、咨询和培训服务；⑦中国证监会批准的其他业务。</string>
+					</dict>
+<dict>
+						<key>question_type</key>
+						<string>3</string>
+						<key>question_content</key>
+						<string>在证券交易所的交易中，投资者都是法人，个人投资者只能进人证券公司柜台市场买卖证券。(    )[2010年5月真题]</string>
+						<key>question_choice</key>
+						<array>
+							<string>正确</string>
+							<string>错误</string>
+						</array>
+						<key>question_answer</key>
+						<string>B</string>
+						<key>question_description</key>
+						<string>证券投资者是买卖证券的主体，可以分为个人投资者和机构投资者两大类。就投资者买卖证券的基本途径来看，主要有两条：一是直接进入交易场所自行买卖证券，如投资者在柜台市场上与对方直接交易；二是委托经纪商代理买卖证券。在证券交易所的交易中，除了按规定允许的证券公司自营买卖外，投资者都要通过委托经纪商代理才能买卖证券。</string>
+					</dict>
+				</array>
+			</dict>
+			<dict>
+				<key>section_name</key>
+				<string>第二节 证券交易所的会员、席位和交易单元</string>
+				<key>questions</key>
+				<array>
+					<dict>
+						<key>question_type</key>
+						<string>1</string>
+						<key>question_content</key>
+						<string>证券交易所会员应当设会员业务联络人(    )，根据授权履行会员代表职责。[2010年5月真题]</string>
+						<key>question_choice</key>
+						<array>
+							<string>2～4名</string>
+							<string>1～4名</string>
+							<string>2～3名</string>
+							<string>1～2名</string>
+						</array>
+						<key>question_answer</key>
+						<string>B</string>
+						<key>question_description</key>
+						<string>证券交易所会员应当设会员代表1名，组织、协调会员与证券交易所的各项业务往来。会员代表由会员高级管理人员担任。会员应当设会员业务联络人1～4名，根据授权代位履行会员代表职责。</string>
+					</dict>
+					<dict>
+						<key>question_type</key>
+						<string>2</string>
+						<key>question_content</key>
+						<string>一般来说，证券交易所是从证券公司的(    )等方面规定入会的条件。[2010年5月真题]</string>
+						<key>question_choice</key>
+						<array>
+							<string>承担风险和责任的资格及能力</string>
+							<string>组织机构</string>
+							<string>经营范围</string>
+							<string>人员素质</string>
+						</array>
+						<key>question_answer</key>
+						<string>ABCD</string>
+						<key>question_description</key>
+						<string>一般来说，证券交易所是从证券公司的经营范围、承担风险和责任的资格及能力、组织机构、人员素质等方面规定入会的条件。</string>
+					</dict>
+<dict>
+						<key>question_type</key>
+						<string>3</string>
+						<key>question_content</key>
+						<string>深圳证券交易所规定，会员取得席位后，只能向交易所申请设立1个交易单元。(    )[2010年5月真题]</string>
+						<key>question_choice</key>
+						<array>
+							<string>正确</string>
+							<string>错误</string>
+						</array>
+						<key>question_answer</key>
+						<string>B</string>
+						<key>question_description</key>
+						<string>深圳证券交易所会员取得席位后，可根据业务需要向交易所申请设立1个或1个以上的交易单元。会员通过其在交易所设立的交易单元参与证券交易，接受交易所交易服务和管理。</string>
+					</dict>
+				</array>
+			</dict>
+		</array>
+	</dict>
+	<dict>
+		<key>chapter_name</key>
+		<string>第二章 证券交易程序</string>
+		<key>sections</key>
+		<array>
+			<dict>
+				<key>section_name</key>
+				<string>第一节 证券交易程序概述</string>
+				<key>questions</key>
+				<array>
+					<dict>
+						<key>question_type</key>
+						<string>1</string>
+						<key>question_content</key>
+						<string>在订单匹配原则方面，各国证券交易所普遍使用(    )原则作为第一优先原则。[2010年5月真题]</string>
+						<key>question_choice</key>
+						<array>
+							<string>数量优先</string>
+							<string>客户优先</string>
+							<string>价格优先</string>
+							<string>时间优先</string>
+						</array>
+						<key>question_answer</key>
+						<string>C</string>
+						<key>question_description</key>
+						<string>在订单匹配原则方面，根据各国(地区)证券市场的实践，优先原则主要有：价格优先原则、时间优先原则、按比例分配原则、数量优先原则、客户优先原则、做市商优先原则和经纪商优先原则等。其中，各证券交易所普遍使用价格优先原则作为第一优先原则。我国采用价格优先和时间优先原则。</string>
+					</dict>
+					<dict>
+						<key>question_type</key>
+						<string>2</string>
+						<key>question_content</key>
+						<string>在订单匹配原则方面，根据各国证券市场的实践，优先原则主要包括(    )。[2009年5月真题]</string>
+						<key>question_choice</key>
+						<array>
+							<string>价格优先原则</string>
+							<string>时间优先原则</string>
+							<string>按比例分配原则</string>
+							<string>数量优先原则</string>
+						</array>
+						<key>question_answer</key>
+						<string>ABCD</string>
+						<key>question_description</key>
+						<string>在订单匹配原则方面，根据各国证券市场的实践，优先原则主要有：价格优先原则、时间优先原则、按比例分配原则、数量优先原则、客户优先原则、做市商优先原则和经纪商优先原则等。</string>
+					</dict>
+<dict>
+						<key>question_type</key>
+						<string>3</string>
+						<key>question_content</key>
+						<string>1．对于记名证券而言，完成了清算和交收，证券交易过程即告结束。(    )</string>
+						<key>question_choice</key>
+						<array>
+							<string>正确</string>
+							<string>错误</string>
+						</array>
+						<key>question_answer</key>
+						<string>B</string>
+						<key>question_description</key>
+						<string>对于记名证券而言，完成了清算和交收，还有一个登记过户的环节。完成了登记过户，证券交易过程才告结束。</string>
+					</dict>
+				</array>
+			</dict>
+		</array>
+	</dict>
+</array>
+</plist>

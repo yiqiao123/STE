@@ -7,11 +7,22 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreData/CoreData.h>
+
+static NSString * const kChapter = @"Chapter";
+static NSString * const kSection = @"Section";
+static NSString * const kQuestion = @"Question";
+static NSString * const kFavorite = @"Favorite";
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
+@property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+@property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
+@property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
+- (void)saveContext;
+- (NSURL *)applicationDocumentsDirectory;
 @end
 
