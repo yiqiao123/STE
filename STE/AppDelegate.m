@@ -47,6 +47,7 @@
                 [theQuestion setValue:[question objectForKey:@"question_content"] forKey:@"content"];
                 [theQuestion setValue:[question objectForKey:@"question_description"] forKey:@"analysis"];
                 [theQuestion setValue:[question objectForKey:@"question_answer"] forKey:@"answer"];
+                [theQuestion setValue:[NSNumber numberWithBool:NO] forKey:@"isFavorite"];
                 int choice_id = 1;
                 for (NSString *choice in [question objectForKey:@"question_choice"]) {
                     [theQuestion setValue:choice forKey:[NSString stringWithFormat:@"choice%d", choice_id]];
@@ -59,15 +60,6 @@
         chapter_id++;
     }
     [self saveContext];
-    
-    NSError *error;
-    NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kSection];
-    NSArray *objects = [context executeFetchRequest:request error:&error];
-    for (NSManagedObject *object in objects) {
-        NSLog(@"id%@", [object valueForKey:@"id"]);
-        NSLog(@"cid%@", [object valueForKey:@"chapter_id"]);
-    }
-    
     
     extern CFAbsoluteTime StartTime;
     dispatch_async(dispatch_get_main_queue(), ^{

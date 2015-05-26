@@ -6,10 +6,31 @@
         <attribute name="right_times" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="wrong_times" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
     </entity>
-    <entity name="Favorite" syncable="YES">
-        <attribute name="date" optional="YES" attributeType="Date" syncable="YES"/>
+    <entity name="History" syncable="YES">
+        <attribute name="date" attributeType="Date" syncable="YES"/>
         <attribute name="id" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
-        <attribute name="question_id" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="isExam" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isSubmit" attributeType="Boolean" syncable="YES"/>
+        <attribute name="judge_points" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="judge_total_points" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="mutiple_points" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="mutiple_total_points" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="points" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="section_name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="single_points" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="single_total_points" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="total_points" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+    </entity>
+    <entity name="History_Question" syncable="YES">
+        <attribute name="choose1" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="choose2" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="choose3" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="choose4" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="correct" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="history_id" optional="YES" attributeType="Integer 32" defaultValueString="0" indexed="YES" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="question_id" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="question_number" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
     </entity>
     <entity name="Question" syncable="YES">
         <attribute name="analysis" optional="YES" attributeType="String" syncable="YES"/>
@@ -19,7 +40,9 @@
         <attribute name="choice3" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="choice4" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="content" attributeType="String" syncable="YES"/>
-        <attribute name="id" attributeType="Integer 32" defaultValueString="0" indexed="YES" syncable="YES"/>
+        <attribute name="favorite_date" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="id" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="isFavorite" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
         <attribute name="right_times" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="section_id" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="type" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
@@ -34,8 +57,9 @@
     </entity>
     <elements>
         <element name="Chapter" positionX="-63" positionY="-18" width="128" height="103"/>
-        <element name="Section" positionX="124" positionY="-22" width="128" height="118"/>
-        <element name="Question" positionX="45" positionY="27" width="128" height="225"/>
-        <element name="Favorite" positionX="54" positionY="108" width="128" height="30"/>
+        <element name="History" positionX="27" positionY="108" width="128" height="240"/>
+        <element name="History_Question" positionX="36" positionY="117" width="128" height="180"/>
+        <element name="Question" positionX="45" positionY="27" width="128" height="255"/>
+        <element name="Section" positionX="124" positionY="-22" width="128" height="120"/>
     </elements>
 </model>

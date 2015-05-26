@@ -19,27 +19,17 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    ChaptersAndSections *chaptersAndSections = [ChaptersAndSections shared];
+    
     self.tableView.rowHeight = UITableViewAutomaticDimension;
-    self.tableView.estimatedRowHeight = 10.0;
+    self.tableView.estimatedRowHeight = 74;
     self.display_items = [NSMutableArray array];
     self.head = [[TreeNode alloc] initWithObject:nil andLevel:0];
     self.head.isExpand = YES;
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    NSManagedObjectContext *context = [appDelegate managedObjectContext];
-    NSError *error;
-    NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kChapter];
-    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"id" ascending:YES];
-    NSArray * sortDescriptors = [NSArray arrayWithObject: sort];
-    [request setSortDescriptors:sortDescriptors];
-    NSArray *chapters = [context executeFetchRequest:request error:&error];
-    for (NSManagedObject *chapter in chapters) {
+
+    for (NSManagedObject *chapter in [chaptersAndSections allChapters]) {
         TreeNode *chapter_node = [[TreeNode alloc] initWithObject:chapter andLevel:1];
-        NSFetchRequest *section_request = [[NSFetchRequest alloc] initWithEntityName:kSection];
-        NSPredicate *pred = [NSPredicate predicateWithFormat:@"(chapter_id = %d)", [[chapter valueForKey:@"id"] integerValue]];
-        [section_request setPredicate:pred];
-        [section_request setSortDescriptors:sortDescriptors];
-        NSArray *sections = [context executeFetchRequest:section_request error:&error];
-        for (NSManagedObject *section in sections) {
+        for (NSManagedObject *section in [chaptersAndSections sectionsWithChapterId:[chapter valueForKey:@"id"]]) {
             TreeNode *section_node = [[TreeNode alloc] initWithObject:section andLevel:2];
             [chapter_node addChild:section_node];
         }
@@ -47,7 +37,6 @@
     }
     
     [self addNodeToDisplayArray: self.head];
-    //[self.tableView reloadData];
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
@@ -59,6 +48,10 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [self.tableView reloadData];
 }
 
 - (void)addNodeToDisplayArray: (TreeNode *) node{
@@ -106,19 +99,20 @@
     QuestionBankTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Directory" forIndexPath:indexPath];
     TreeNode *node = (TreeNode *)self.display_items[indexPath.row];
     NSManagedObject *object = [node value];
-    
-    
-        
+
     cell.name.text = [object valueForKey:@"name"];
     
     long wrong_times = [[object valueForKey:@"wrong_times"] integerValue];
     long right_times = [[object valueForKey:@"right_times"] integerValue];
     if (wrong_times + right_times) {
         cell.correct_rate.text = [NSString stringWithFormat:@"%.2f%%", (double)right_times / (wrong_times + right_times)];
+    } else {
+        cell.correct_rate.text = nil;
     }
     
     if (node.isLeaf) {
         cell.nodeImage.image = nil;
+        cell.show_questions.hidden = NO;
         for (UIGestureRecognizer *gestureRecognizer in [cell gestureRecognizers]) {
             [cell removeGestureRecognizer:gestureRecognizer];
         }
@@ -128,9 +122,11 @@
         } else {
             cell.nodeImage.image = [UIImage imageNamed:@"close"];
         }
+        cell.show_questions.hidden = YES;
         UITapGestureRecognizer *single = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellSingleTap:)];
-        single.numberOfTapsRequired = 1;
-        [cell addGestureRecognizer:single];
+        if ([[cell gestureRecognizers] count] == 0) {
+            [cell addGestureRecognizer:single];
+        }
     }
     
     return cell;
@@ -170,14 +166,29 @@
 }
 */
 
-/*
+
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
+    NSIndexPath *indexPath;
+    if ([segue.identifier isEqualToString:@"buttonToQuestions"]) {
+        indexPath = [self.tableView indexPathForCell:(UITableViewCell *)[[sender superview] superview]];
+    } else {
+        indexPath = [self.tableView indexPathForCell:sender];
+    }
+    QuestionTableViewController *quesTVC = segue.destinationViewController;
+    NSManagedObject *section = [(TreeNode *)self.display_items[indexPath.row] value];
+    quesTVC.title = [section valueForKey:@"name"];
+    quesTVC.sections = [NSArray arrayWithObjects:section, nil];
+    quesTVC.isExam = NO;
+    quesTVC.isHistory = NO;
+    quesTVC.isSubmit = NO;
+    quesTVC.isShowAnswer = NO;
+    quesTVC.isShowFault = NO;
 }
-*/
+
 
 @end

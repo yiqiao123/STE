@@ -10,6 +10,7 @@
 #import "AppDelegate.h"
 
 CFAbsoluteTime StartTime;
+
 int main(int argc, char * argv[]) {
     @autoreleasepool {
         StartTime = CFAbsoluteTimeGetCurrent();

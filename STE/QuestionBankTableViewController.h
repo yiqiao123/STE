@@ -10,6 +10,8 @@
 #import "TreeNode.h"
 #import "AppDelegate.h"
 #import "QuestionBankTableViewCell.h"
+#import "QuestionTableViewController.h"
+#import "ChaptersAndSections.h"
 
 @interface QuestionBankTableViewController : UITableViewController
 

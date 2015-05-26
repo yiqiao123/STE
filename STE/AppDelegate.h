@@ -12,7 +12,8 @@
 static NSString * const kChapter = @"Chapter";
 static NSString * const kSection = @"Section";
 static NSString * const kQuestion = @"Question";
-static NSString * const kFavorite = @"Favorite";
+static NSString * const kHistory = @"History";
+static NSString * const kHistoryQuestion = @"History_Question";
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
