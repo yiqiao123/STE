@@ -15,10 +15,12 @@ static NSString * const kQuestion = @"Question";
 static NSString * const kHistory = @"History";
 static NSString * const kHistoryQuestion = @"History_Question";
 
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
+@property (strong, nonatomic) NSMutableDictionary *settings;
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;

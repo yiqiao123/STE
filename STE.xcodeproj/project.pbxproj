@@ -10,23 +10,31 @@
 		41327CDB1AF91F6E004D3AF3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 41327CDA1AF91F6E004D3AF3 /* main.m */; };
 		41327CDE1AF91F6E004D3AF3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 41327CDD1AF91F6E004D3AF3 /* AppDelegate.m */; };
 		41327CE71AF91F6E004D3AF3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 41327CE51AF91F6E004D3AF3 /* Main.storyboard */; };
-		41327CE91AF91F6E004D3AF3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 41327CE81AF91F6E004D3AF3 /* Images.xcassets */; };
 		41327CEC1AF91F6E004D3AF3 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 41327CEA1AF91F6E004D3AF3 /* LaunchScreen.xib */; };
 		41327CF81AF91F6E004D3AF3 /* STETests.m in Sources */ = {isa = PBXBuildFile; fileRef = 41327CF71AF91F6E004D3AF3 /* STETests.m */; };
+		413EA8851B1B204B009BC6B8 /* MoreTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 413EA8841B1B204B009BC6B8 /* MoreTableViewController.m */; };
+		413EA8881B1B52F7009BC6B8 /* MoreSegmentTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 413EA8871B1B52F7009BC6B8 /* MoreSegmentTableViewCell.m */; };
+		413EA88B1B1B5307009BC6B8 /* MoreSwitchTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 413EA88A1B1B5307009BC6B8 /* MoreSwitchTableViewCell.m */; };
 		4167395F1AFBC8E100E5945A /* STE.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4167395D1AFBC8E100E5945A /* STE.xcdatamodeld */; };
 		4193E42D1B12244600C59DED /* QuestionResultViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4193E42C1B12244600C59DED /* QuestionResultViewController.m */; };
 		4193E4341B13836000C59DED /* FavoriteTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4193E4331B13836000C59DED /* FavoriteTableViewController.m */; };
 		4193E4371B1383A200C59DED /* FavoriteTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4193E4361B1383A200C59DED /* FavoriteTableViewCell.m */; };
 		4193E43A1B14BB1B00C59DED /* HistoryTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4193E4391B14BB1B00C59DED /* HistoryTableViewController.m */; };
 		4193E43D1B14CC6000C59DED /* ChaptersAndSections.m in Sources */ = {isa = PBXBuildFile; fileRef = 4193E43C1B14CC6000C59DED /* ChaptersAndSections.m */; };
+		4193E4401B16260A00C59DED /* ExamTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4193E43F1B16260A00C59DED /* ExamTableViewController.m */; };
+		4193E4431B16282B00C59DED /* ExamTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4193E4421B16282B00C59DED /* ExamTableViewCell.m */; };
 		41B2C2081AFF3E970009B582 /* questions.plist in Resources */ = {isa = PBXBuildFile; fileRef = 41B2C2071AFF3E970009B582 /* questions.plist */; };
 		41B2C2401B00E81F0009B582 /* QuestionBankTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41B2C23F1B00E81F0009B582 /* QuestionBankTableViewController.m */; };
 		41B2C2431B00F2810009B582 /* TreeNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 41B2C2421B00F2810009B582 /* TreeNode.m */; };
-		41C104DE1B0E1BE600F671BD /* KxMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C104DD1B0E1BE600F671BD /* KxMenu.m */; };
 		41C306D21B02503A00C5B527 /* QuestionBankTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C306D11B02503A00C5B527 /* QuestionBankTableViewCell.m */; };
 		41C306D81B0355DF00C5B527 /* securities.plist in Resources */ = {isa = PBXBuildFile; fileRef = 41C306D71B0355DF00C5B527 /* securities.plist */; };
 		41C306DB1B0366DA00C5B527 /* QuestionTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C306DA1B0366DA00C5B527 /* QuestionTableViewCell.m */; };
 		41C306E11B03675000C5B527 /* QuestionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C306E01B03675000C5B527 /* QuestionTableViewController.m */; };
+		41F205CE1B26029E009DF0E1 /* PopupMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F205C71B26029E009DF0E1 /* PopupMenu.m */; };
+		41F205CF1B26029E009DF0E1 /* MenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F205C91B26029E009DF0E1 /* MenuView.m */; };
+		41F205D01B26029E009DF0E1 /* MenuOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F205CB1B26029E009DF0E1 /* MenuOverlay.m */; };
+		41F205D11B26029E009DF0E1 /* MenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F205CD1B26029E009DF0E1 /* MenuItem.m */; };
+		41F205E31B288D2C009DF0E1 /* Image.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 41F205E21B288D2C009DF0E1 /* Image.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,11 +54,16 @@
 		41327CDC1AF91F6E004D3AF3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		41327CDD1AF91F6E004D3AF3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		41327CE61AF91F6E004D3AF3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		41327CE81AF91F6E004D3AF3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		41327CEB1AF91F6E004D3AF3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		41327CF11AF91F6E004D3AF3 /* STETests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = STETests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		41327CF61AF91F6E004D3AF3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		41327CF71AF91F6E004D3AF3 /* STETests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = STETests.m; sourceTree = "<group>"; };
+		413EA8831B1B204B009BC6B8 /* MoreTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MoreTableViewController.h; sourceTree = "<group>"; };
+		413EA8841B1B204B009BC6B8 /* MoreTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MoreTableViewController.m; sourceTree = "<group>"; };
+		413EA8861B1B52F7009BC6B8 /* MoreSegmentTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MoreSegmentTableViewCell.h; sourceTree = "<group>"; };
+		413EA8871B1B52F7009BC6B8 /* MoreSegmentTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MoreSegmentTableViewCell.m; sourceTree = "<group>"; };
+		413EA8891B1B5307009BC6B8 /* MoreSwitchTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MoreSwitchTableViewCell.h; sourceTree = "<group>"; };
+		413EA88A1B1B5307009BC6B8 /* MoreSwitchTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MoreSwitchTableViewCell.m; sourceTree = "<group>"; };
 		4167395E1AFBC8E100E5945A /* STE.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = STE.xcdatamodel; sourceTree = "<group>"; };
 		4193E42B1B12244600C59DED /* QuestionResultViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuestionResultViewController.h; sourceTree = "<group>"; };
 		4193E42C1B12244600C59DED /* QuestionResultViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuestionResultViewController.m; sourceTree = "<group>"; };
@@ -62,13 +75,15 @@
 		4193E4391B14BB1B00C59DED /* HistoryTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HistoryTableViewController.m; sourceTree = "<group>"; };
 		4193E43B1B14CC6000C59DED /* ChaptersAndSections.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChaptersAndSections.h; sourceTree = "<group>"; };
 		4193E43C1B14CC6000C59DED /* ChaptersAndSections.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChaptersAndSections.m; sourceTree = "<group>"; };
+		4193E43E1B16260A00C59DED /* ExamTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExamTableViewController.h; sourceTree = "<group>"; };
+		4193E43F1B16260A00C59DED /* ExamTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExamTableViewController.m; sourceTree = "<group>"; };
+		4193E4411B16282B00C59DED /* ExamTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExamTableViewCell.h; sourceTree = "<group>"; };
+		4193E4421B16282B00C59DED /* ExamTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExamTableViewCell.m; sourceTree = "<group>"; };
 		41B2C2071AFF3E970009B582 /* questions.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = questions.plist; sourceTree = "<group>"; };
 		41B2C23E1B00E81F0009B582 /* QuestionBankTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuestionBankTableViewController.h; sourceTree = "<group>"; };
 		41B2C23F1B00E81F0009B582 /* QuestionBankTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuestionBankTableViewController.m; sourceTree = "<group>"; };
 		41B2C2411B00F2810009B582 /* TreeNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TreeNode.h; sourceTree = "<group>"; };
 		41B2C2421B00F2810009B582 /* TreeNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TreeNode.m; sourceTree = "<group>"; };
-		41C104DC1B0E1BE600F671BD /* KxMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KxMenu.h; sourceTree = "<group>"; };
-		41C104DD1B0E1BE600F671BD /* KxMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KxMenu.m; sourceTree = "<group>"; };
 		41C306D01B02503A00C5B527 /* QuestionBankTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuestionBankTableViewCell.h; sourceTree = "<group>"; };
 		41C306D11B02503A00C5B527 /* QuestionBankTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuestionBankTableViewCell.m; sourceTree = "<group>"; };
 		41C306D71B0355DF00C5B527 /* securities.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = securities.plist; sourceTree = "<group>"; };
@@ -76,6 +91,15 @@
 		41C306DA1B0366DA00C5B527 /* QuestionTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuestionTableViewCell.m; sourceTree = "<group>"; };
 		41C306DF1B03675000C5B527 /* QuestionTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuestionTableViewController.h; sourceTree = "<group>"; };
 		41C306E01B03675000C5B527 /* QuestionTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuestionTableViewController.m; sourceTree = "<group>"; };
+		41F205C61B26029E009DF0E1 /* PopupMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PopupMenu.h; sourceTree = "<group>"; };
+		41F205C71B26029E009DF0E1 /* PopupMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PopupMenu.m; sourceTree = "<group>"; };
+		41F205C81B26029E009DF0E1 /* MenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuView.h; sourceTree = "<group>"; };
+		41F205C91B26029E009DF0E1 /* MenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuView.m; sourceTree = "<group>"; };
+		41F205CA1B26029E009DF0E1 /* MenuOverlay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuOverlay.h; sourceTree = "<group>"; };
+		41F205CB1B26029E009DF0E1 /* MenuOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuOverlay.m; sourceTree = "<group>"; };
+		41F205CC1B26029E009DF0E1 /* MenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuItem.h; sourceTree = "<group>"; };
+		41F205CD1B26029E009DF0E1 /* MenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuItem.m; sourceTree = "<group>"; };
+		41F205E21B288D2C009DF0E1 /* Image.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Image.xcassets; path = ../Image.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,7 +123,7 @@
 		41327CCC1AF91F6E004D3AF3 = {
 			isa = PBXGroup;
 			children = (
-				41C104DB1B0E1BD400F671BD /* KsMenu */,
+				41C104DB1B0E1BD400F671BD /* PopMenu */,
 				41327CD71AF91F6E004D3AF3 /* STE */,
 				41327CF41AF91F6E004D3AF3 /* STETests */,
 				41327CD61AF91F6E004D3AF3 /* Products */,
@@ -118,33 +142,43 @@
 		41327CD71AF91F6E004D3AF3 /* STE */ = {
 			isa = PBXGroup;
 			children = (
+				41F205E21B288D2C009DF0E1 /* Image.xcassets */,
 				41C306DF1B03675000C5B527 /* QuestionTableViewController.h */,
 				41C306E01B03675000C5B527 /* QuestionTableViewController.m */,
+				41C306D91B0366DA00C5B527 /* QuestionTableViewCell.h */,
+				41C306DA1B0366DA00C5B527 /* QuestionTableViewCell.m */,
 				41C306D71B0355DF00C5B527 /* securities.plist */,
 				41B2C2071AFF3E970009B582 /* questions.plist */,
 				41327CDC1AF91F6E004D3AF3 /* AppDelegate.h */,
 				41327CDD1AF91F6E004D3AF3 /* AppDelegate.m */,
 				41327CE51AF91F6E004D3AF3 /* Main.storyboard */,
+				4193E4381B14BB1B00C59DED /* HistoryTableViewController.h */,
+				4193E4391B14BB1B00C59DED /* HistoryTableViewController.m */,
+				413EA8831B1B204B009BC6B8 /* MoreTableViewController.h */,
+				413EA8841B1B204B009BC6B8 /* MoreTableViewController.m */,
+				413EA8861B1B52F7009BC6B8 /* MoreSegmentTableViewCell.h */,
+				413EA8871B1B52F7009BC6B8 /* MoreSegmentTableViewCell.m */,
+				413EA8891B1B5307009BC6B8 /* MoreSwitchTableViewCell.h */,
+				413EA88A1B1B5307009BC6B8 /* MoreSwitchTableViewCell.m */,
+				4193E43E1B16260A00C59DED /* ExamTableViewController.h */,
+				4193E43F1B16260A00C59DED /* ExamTableViewController.m */,
+				4193E4411B16282B00C59DED /* ExamTableViewCell.h */,
+				4193E4421B16282B00C59DED /* ExamTableViewCell.m */,
 				4193E42B1B12244600C59DED /* QuestionResultViewController.h */,
 				4193E42C1B12244600C59DED /* QuestionResultViewController.m */,
-				41C306D91B0366DA00C5B527 /* QuestionTableViewCell.h */,
-				41C306DA1B0366DA00C5B527 /* QuestionTableViewCell.m */,
-				41C306D01B02503A00C5B527 /* QuestionBankTableViewCell.h */,
-				41C306D11B02503A00C5B527 /* QuestionBankTableViewCell.m */,
-				41327CE81AF91F6E004D3AF3 /* Images.xcassets */,
-				41327CEA1AF91F6E004D3AF3 /* LaunchScreen.xib */,
-				41327CD81AF91F6E004D3AF3 /* Supporting Files */,
-				4167395D1AFBC8E100E5945A /* STE.xcdatamodeld */,
 				41B2C23E1B00E81F0009B582 /* QuestionBankTableViewController.h */,
 				41B2C23F1B00E81F0009B582 /* QuestionBankTableViewController.m */,
-				41B2C2411B00F2810009B582 /* TreeNode.h */,
-				41B2C2421B00F2810009B582 /* TreeNode.m */,
+				41C306D01B02503A00C5B527 /* QuestionBankTableViewCell.h */,
+				41C306D11B02503A00C5B527 /* QuestionBankTableViewCell.m */,
 				4193E4321B13836000C59DED /* FavoriteTableViewController.h */,
 				4193E4331B13836000C59DED /* FavoriteTableViewController.m */,
 				4193E4351B1383A200C59DED /* FavoriteTableViewCell.h */,
 				4193E4361B1383A200C59DED /* FavoriteTableViewCell.m */,
-				4193E4381B14BB1B00C59DED /* HistoryTableViewController.h */,
-				4193E4391B14BB1B00C59DED /* HistoryTableViewController.m */,
+				41327CEA1AF91F6E004D3AF3 /* LaunchScreen.xib */,
+				41327CD81AF91F6E004D3AF3 /* Supporting Files */,
+				4167395D1AFBC8E100E5945A /* STE.xcdatamodeld */,
+				41B2C2411B00F2810009B582 /* TreeNode.h */,
+				41B2C2421B00F2810009B582 /* TreeNode.m */,
 				4193E43B1B14CC6000C59DED /* ChaptersAndSections.h */,
 				4193E43C1B14CC6000C59DED /* ChaptersAndSections.m */,
 			);
@@ -177,13 +211,19 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		41C104DB1B0E1BD400F671BD /* KsMenu */ = {
+		41C104DB1B0E1BD400F671BD /* PopMenu */ = {
 			isa = PBXGroup;
 			children = (
-				41C104DC1B0E1BE600F671BD /* KxMenu.h */,
-				41C104DD1B0E1BE600F671BD /* KxMenu.m */,
+				41F205C61B26029E009DF0E1 /* PopupMenu.h */,
+				41F205C71B26029E009DF0E1 /* PopupMenu.m */,
+				41F205C81B26029E009DF0E1 /* MenuView.h */,
+				41F205C91B26029E009DF0E1 /* MenuView.m */,
+				41F205CA1B26029E009DF0E1 /* MenuOverlay.h */,
+				41F205CB1B26029E009DF0E1 /* MenuOverlay.m */,
+				41F205CC1B26029E009DF0E1 /* MenuItem.h */,
+				41F205CD1B26029E009DF0E1 /* MenuItem.m */,
 			);
-			name = KsMenu;
+			name = PopMenu;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -268,9 +308,9 @@
 			files = (
 				41B2C2081AFF3E970009B582 /* questions.plist in Resources */,
 				41327CE71AF91F6E004D3AF3 /* Main.storyboard in Resources */,
+				41F205E31B288D2C009DF0E1 /* Image.xcassets in Resources */,
 				41327CEC1AF91F6E004D3AF3 /* LaunchScreen.xib in Resources */,
 				41C306D81B0355DF00C5B527 /* securities.plist in Resources */,
-				41327CE91AF91F6E004D3AF3 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,18 +329,26 @@
 			buildActionMask = 2147483647;
 			files = (
 				4193E43A1B14BB1B00C59DED /* HistoryTableViewController.m in Sources */,
+				41F205D11B26029E009DF0E1 /* MenuItem.m in Sources */,
 				41B2C2431B00F2810009B582 /* TreeNode.m in Sources */,
 				41327CDE1AF91F6E004D3AF3 /* AppDelegate.m in Sources */,
 				4193E4341B13836000C59DED /* FavoriteTableViewController.m in Sources */,
+				41F205D01B26029E009DF0E1 /* MenuOverlay.m in Sources */,
 				41B2C2401B00E81F0009B582 /* QuestionBankTableViewController.m in Sources */,
+				41F205CE1B26029E009DF0E1 /* PopupMenu.m in Sources */,
 				41C306D21B02503A00C5B527 /* QuestionBankTableViewCell.m in Sources */,
-				41C104DE1B0E1BE600F671BD /* KxMenu.m in Sources */,
+				413EA8881B1B52F7009BC6B8 /* MoreSegmentTableViewCell.m in Sources */,
 				4193E43D1B14CC6000C59DED /* ChaptersAndSections.m in Sources */,
+				41F205CF1B26029E009DF0E1 /* MenuView.m in Sources */,
+				4193E4401B16260A00C59DED /* ExamTableViewController.m in Sources */,
 				41C306DB1B0366DA00C5B527 /* QuestionTableViewCell.m in Sources */,
 				4167395F1AFBC8E100E5945A /* STE.xcdatamodeld in Sources */,
+				413EA8851B1B204B009BC6B8 /* MoreTableViewController.m in Sources */,
 				4193E42D1B12244600C59DED /* QuestionResultViewController.m in Sources */,
+				4193E4431B16282B00C59DED /* ExamTableViewCell.m in Sources */,
 				4193E4371B1383A200C59DED /* FavoriteTableViewCell.m in Sources */,
 				41327CDB1AF91F6E004D3AF3 /* main.m in Sources */,
+				413EA88B1B1B5307009BC6B8 /* MoreSwitchTableViewCell.m in Sources */,
 				41C306E11B03675000C5B527 /* QuestionTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

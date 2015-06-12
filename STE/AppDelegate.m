@@ -16,51 +16,89 @@
 @end
 
 @implementation AppDelegate
+@synthesize settings;
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
-    [self deleteAndRecreateStore];
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
+    settings = [NSMutableDictionary dictionary];
+    settings[@"font"] = @1;
+    settings[@"background"] = @0;
+    settings[@"isShowAnswer"] = [NSNumber numberWithBool:NO];
+    settings[@"isLongPressFavor"] = [NSNumber numberWithBool:YES];
+    settings[@"isFaultPrefer"] = [NSNumber numberWithBool:YES];
     
-    NSBundle *bundle = [NSBundle mainBundle];
-    NSURL *plistURL = [bundle URLForResource:@"securities" withExtension:@"plist"];
-    NSArray *chapters = [NSArray arrayWithContentsOfURL:plistURL];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    NSManagedObjectContext *context = [appDelegate managedObjectContext];
-    
-    int chapter_id = 1;
-    for (NSDictionary *chapter in chapters) {
-        int section_id = 1;
-        NSManagedObject *theChapter = [NSEntityDescription insertNewObjectForEntityForName:kChapter inManagedObjectContext:context];
-        [theChapter setValue:[NSNumber numberWithInt:chapter_id] forKey:@"id"];
-        [theChapter setValue:[chapter objectForKey:@"chapter_name"] forKey:@"name"];
-        for (NSDictionary *section in [chapter objectForKey:@"sections"]) {
-            int question_id = 1;
-            NSManagedObject *theSection = [NSEntityDescription insertNewObjectForEntityForName:kSection inManagedObjectContext:context];
-            [theSection setValue:[NSNumber numberWithInt:chapter_id] forKey:@"chapter_id"];
-            [theSection setValue:[NSNumber numberWithInt:chapter_id * 100 + section_id] forKey:@"id"];
-            [theSection setValue:[section objectForKey:@"section_name"] forKey:@"name"];
-            for (NSDictionary *question in [section objectForKey:@"questions"]) {
-                NSManagedObject *theQuestion = [NSEntityDescription insertNewObjectForEntityForName:kQuestion inManagedObjectContext:context];
-                [theQuestion setValue:[NSNumber numberWithInt:chapter_id * 100 + section_id] forKey:@"section_id"];
-                [theQuestion setValue:[NSNumber numberWithInt:(chapter_id * 100 + section_id) * 1000 + question_id] forKey:@"id"];
-                [theQuestion setValue:[NSNumber numberWithInt:[[question objectForKey:@"question_type"] integerValue]]forKey:@"type"];
-                [theQuestion setValue:[question objectForKey:@"question_content"] forKey:@"content"];
-                [theQuestion setValue:[question objectForKey:@"question_description"] forKey:@"analysis"];
-                [theQuestion setValue:[question objectForKey:@"question_answer"] forKey:@"answer"];
-                [theQuestion setValue:[NSNumber numberWithBool:NO] forKey:@"isFavorite"];
-                int choice_id = 1;
-                for (NSString *choice in [question objectForKey:@"question_choice"]) {
-                    [theQuestion setValue:choice forKey:[NSString stringWithFormat:@"choice%d", choice_id]];
-                    choice_id++;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if (![defaults objectForKey:@"isFirstStart"] || [[defaults objectForKey:@"isFirstStart"] boolValue]) {
+        //初始化数据库
+        [self deleteAndRecreateStore];
+        NSBundle *bundle = [NSBundle mainBundle];
+        NSURL *plistURL = [bundle URLForResource:@"securities" withExtension:@"plist"];
+        NSArray *chapters = [NSArray arrayWithContentsOfURL:plistURL];
+        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        NSManagedObjectContext *context = [appDelegate managedObjectContext];
+        
+        int chapter_id = 1;
+        for (NSDictionary *chapter in chapters) {
+            int section_id = 1;
+            NSManagedObject *theChapter = [NSEntityDescription insertNewObjectForEntityForName:kChapter inManagedObjectContext:context];
+            [theChapter setValue:[NSNumber numberWithInt:chapter_id] forKey:@"id"];
+            [theChapter setValue:[chapter objectForKey:@"chapter_name"] forKey:@"name"];
+            for (NSDictionary *section in [chapter objectForKey:@"sections"]) {
+                int question_id = 1;
+                NSManagedObject *theSection = [NSEntityDescription insertNewObjectForEntityForName:kSection inManagedObjectContext:context];
+                [theSection setValue:[NSNumber numberWithInt:chapter_id] forKey:@"chapter_id"];
+                [theSection setValue:[NSNumber numberWithInt:chapter_id * 100 + section_id] forKey:@"id"];
+                [theSection setValue:[section objectForKey:@"section_name"] forKey:@"name"];
+                for (NSDictionary *question in [section objectForKey:@"questions"]) {
+                    NSManagedObject *theQuestion = [NSEntityDescription insertNewObjectForEntityForName:kQuestion inManagedObjectContext:context];
+                    [theQuestion setValue:[NSNumber numberWithInt:chapter_id * 100 + section_id] forKey:@"section_id"];
+                    [theQuestion setValue:[NSNumber numberWithInt:(chapter_id * 100 + section_id) * 1000 + question_id] forKey:@"id"];
+                    [theQuestion setValue:[NSNumber numberWithInteger:[[question objectForKey:@"question_type"] integerValue]]forKey:@"type"];
+                    [theQuestion setValue:[question objectForKey:@"question_content"] forKey:@"content"];
+                    [theQuestion setValue:[question objectForKey:@"question_description"] forKey:@"analysis"];
+                    [theQuestion setValue:[question objectForKey:@"question_answer"] forKey:@"answer"];
+                    [theQuestion setValue:[NSNumber numberWithBool:NO] forKey:@"isFavorite"];
+                    int choice_id = 1;
+                    for (NSString *choice in [question objectForKey:@"question_choice"]) {
+                        [theQuestion setValue:choice forKey:[NSString stringWithFormat:@"choice%d", choice_id]];
+                        choice_id++;
+                    }
+                    question_id++;
                 }
-                question_id++;
+                section_id++;
             }
-            section_id++;
+            chapter_id++;
         }
-        chapter_id++;
+        [self saveContext];
+        [defaults setObject:[NSNumber numberWithBool:NO] forKey:@"isFirstStart"];
     }
-    [self saveContext];
+    if (![defaults objectForKey:@"isShowAnswer"]) {
+        [defaults setObject:settings[@"isShowAnswer"] forKey:@"isShowAnswer"];
+    } else {
+        settings[@"isShowAnswer"] = [defaults objectForKey:@"isShowAnswer"];
+    }
+    if (![defaults objectForKey:@"isLongPressFavor"]) {
+        [defaults setObject:settings[@"isLongPressFavor"] forKey:@"isLongPressFavor"];
+    } else {
+        settings[@"isLongPressFavor"] = [defaults objectForKey:@"isLongPressFavor"];
+    }
+    if (![defaults objectForKey:@"isFaultPrefer"]) {
+        [defaults setObject:settings[@"isFaultPrefer"] forKey:@"isFaultPrefer"];
+    } else {
+        settings[@"isFaultPrefer"] = [defaults objectForKey:@"isFaultPrefer"];
+    }
+    if (![defaults objectForKey:@"font"]) {
+        [defaults setObject:settings[@"font"] forKey:@"font"];
+    } else {
+        settings[@"font"] = [defaults objectForKey:@"font"];
+    }
+    if (![defaults objectForKey:@"background"]) {
+        [defaults setObject:settings[@"background"] forKey:@"background"];
+    } else {
+        settings[@"background"] = [defaults objectForKey:@"background"];
+    }
+    [defaults synchronize];
     
+    NSLog(@"%@", NSHomeDirectory());
     extern CFAbsoluteTime StartTime;
     dispatch_async(dispatch_get_main_queue(), ^{
         printf("%f\n", StartTime);

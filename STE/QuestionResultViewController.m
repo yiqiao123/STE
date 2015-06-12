@@ -16,10 +16,38 @@
 @implementation QuestionResultViewController
 @synthesize history;
 
+- (void)changeSetting{
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
+    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
+    if (background_color == 0) {
+        self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
+        for (UIView *subview in [self.view subviews]) {
+            if ([subview class] == [UILabel class]) {
+                ((UILabel *)subview).textColor = [UIColor darkTextColor];
+            }
+        }
+    } else if(background_color == 1){
+        self.view.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
+        for (UIView *subview in [self.view subviews]) {
+            if ([subview class] == [UILabel class]) {
+                ((UILabel *)subview).textColor = [UIColor darkTextColor];
+            }
+        }
+    } else if(background_color == 2){
+        self.view.backgroundColor = [UIColor blackColor];
+        for (UIView *subview in [self.view subviews]) {
+            if ([subview class] == [UILabel class]) {
+                ((UILabel *)subview).textColor = [UIColor lightTextColor];
+            }
+        }
+    }
+    self.points.textColor = [UIColor redColor];
+    
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-
     if ([[history valueForKey:@"isExam"] boolValue]) {
         self.questionType.text = @"智能出题";
     } else{
@@ -40,6 +68,11 @@
     if ([[history valueForKey:@"total_points"] integerValue] == [[history valueForKey:@"points"] integerValue]) {
         [self.wrong_analysis_button setEnabled:false];
     }
+    //[self changeSetting];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [self changeSetting];
 }
 
 - (void)didReceiveMemoryWarning {

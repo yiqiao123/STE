@@ -17,8 +17,32 @@
 
 @implementation QuestionBankTableViewController
 
+- (void)changeSetting{
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
+    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
+    if (background_color == 0) {
+        self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    } else if(background_color == 1){
+        self.tableView.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
+    } else if(background_color == 2){
+        self.tableView.backgroundColor = [UIColor blackColor];
+    }
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+    self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
+
+    //self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor]};
+    //self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:0.2f green:0.2f blue:0.2f alpha:1.0];
+    //self.navigationController.navigationBar.translucent = YES;
+    
+    
+    UIView *footer =[[UIView alloc] initWithFrame:CGRectZero];
+    self.tableView.tableFooterView = footer;
+    
     ChaptersAndSections *chaptersAndSections = [ChaptersAndSections shared];
     
     self.tableView.rowHeight = UITableViewAutomaticDimension;
@@ -38,6 +62,11 @@
     
     [self addNodeToDisplayArray: self.head];
     
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSArray *visibleRows = [self.tableView indexPathsForVisibleRows];
+        [self.tableView reloadRowsAtIndexPaths:visibleRows withRowAnimation:UITableViewRowAnimationNone];
+    });
+    
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
     
@@ -51,6 +80,7 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated{
+    [self changeSetting];
     [self.tableView reloadData];
 }
 
@@ -81,22 +111,36 @@
     }
 }
 
+- (void)imageSingleTap:(UIGestureRecognizer *)recognizer
+{
+    UITableViewCell *cell = (UITableViewCell *)[[recognizer.view superview] superview];
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    TreeNode *node = self.display_items[indexPath.row];
+    if (!node.isLeaf) {
+        node.isExpand = !node.isExpand;
+        [self.display_items removeAllObjects];
+        [self addNodeToDisplayArray:self.head];
+        [self.tableView reloadData];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+        });
+    }
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-#warning Potentially incomplete method implementation.
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-#warning Incomplete method implementation.
-    // Return the number of rows in the section.
     return [self.display_items count];
 }
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     QuestionBankTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Directory" forIndexPath:indexPath];
+    [cell refreshBackgroundAndFont];
     TreeNode *node = (TreeNode *)self.display_items[indexPath.row];
     NSManagedObject *object = [node value];
 
@@ -113,8 +157,11 @@
     if (node.isLeaf) {
         cell.nodeImage.image = nil;
         cell.show_questions.hidden = NO;
-        for (UIGestureRecognizer *gestureRecognizer in [cell gestureRecognizers]) {
-            [cell removeGestureRecognizer:gestureRecognizer];
+//        for (UIGestureRecognizer *gestureRecognizer in [cell gestureRecognizers]) {
+//            [cell removeGestureRecognizer:gestureRecognizer];
+//        }
+        for (UIGestureRecognizer *gestureRecognizer in [cell.nodeImage gestureRecognizers]) {
+            [cell.nodeImage removeGestureRecognizer:gestureRecognizer];
         }
     } else {
         if (node.isExpand) {
@@ -123,9 +170,13 @@
             cell.nodeImage.image = [UIImage imageNamed:@"close"];
         }
         cell.show_questions.hidden = YES;
-        UITapGestureRecognizer *single = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellSingleTap:)];
-        if ([[cell gestureRecognizers] count] == 0) {
-            [cell addGestureRecognizer:single];
+//        if ([[cell gestureRecognizers] count] == 0) {
+//            UITapGestureRecognizer *single = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cellSingleTap:)];
+//            [cell addGestureRecognizer:single];
+//        }
+        if ([[cell.nodeImage gestureRecognizers] count] == 0) {
+            UITapGestureRecognizer *imageSingle = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageSingleTap:)];
+            [cell.nodeImage addGestureRecognizer:imageSingle];
         }
     }
     
@@ -173,15 +224,10 @@
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
-    NSIndexPath *indexPath;
-    if ([segue.identifier isEqualToString:@"buttonToQuestions"]) {
-        indexPath = [self.tableView indexPathForCell:(UITableViewCell *)[[sender superview] superview]];
-    } else {
-        indexPath = [self.tableView indexPathForCell:sender];
-    }
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:(UITableViewCell *)[[sender superview] superview]];
     QuestionTableViewController *quesTVC = segue.destinationViewController;
     NSManagedObject *section = [(TreeNode *)self.display_items[indexPath.row] value];
-    quesTVC.title = [section valueForKey:@"name"];
+    quesTVC.title = @"刷题";
     quesTVC.sections = [NSArray arrayWithObjects:section, nil];
     quesTVC.isExam = NO;
     quesTVC.isHistory = NO;

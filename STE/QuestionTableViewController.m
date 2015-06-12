@@ -8,6 +8,8 @@
 
 #import "QuestionTableViewController.h"
 #import "QuestionResultViewController.h"
+#import "PopupMenu.h"
+#import "MenuItem.h"
 
 @interface QuestionTableViewController ()
 
@@ -18,6 +20,9 @@
 @property (assign, nonatomic) BOOL isToBottom;
 @property (assign, nonatomic) BOOL isToTop;
 
+@property (assign, nonatomic) BOOL isFaultPrefer_setting;
+@property (assign, nonatomic) BOOL isLongPressFavor_setting;
+@property (strong, nonatomic) PopupMenu *popMenu;
 @end
 
 @implementation QuestionTableViewController
@@ -30,6 +35,9 @@
 @synthesize isShowFault;
 @synthesize history;
 
+@synthesize isFaultPrefer_setting;
+@synthesize isLongPressFavor_setting;
+
 @synthesize displayQuestions;
 @synthesize displayIndexes;
 @synthesize displaySections;
@@ -37,8 +45,85 @@
 @synthesize isToBottom;
 @synthesize isToTop;
 
+@synthesize popMenu;
+
+//洗牌
+- (void)shuffle:(NSMutableArray *) array{
+    int num = (int)[array count];
+    for (int i = num; i > 1; i--) {
+        int random = arc4random() % i;
+        if (random != i - 1) {
+            id temp = array[random];
+            array[random] = array[i - 1];
+            array[i - 1] = temp;
+        }
+    }
+}
+
+//出题
+- (NSMutableArray *)generateQuestion:(NSMutableArray *)questions withQuestionNum:(int)questionNum andFaultPrefer:(BOOL) isFaultPrefer_local
+{
+    NSMutableArray *return_array = [NSMutableArray array];
+    int num = (int)[questions count];
+    if (num == 0) {
+        return return_array;
+    }
+    //错题优先
+    if (isFaultPrefer_local) {
+        int question_weight[num];
+        for (int i = 0 ; i < num; i++) {
+            int wrong_time = (int)[[questions[i] valueForKey:@"wrong_times"] integerValue];
+            int right_time = (int)[[questions[i] valueForKey:@"right_times"] integerValue];
+            question_weight[i] = (int)((float)(wrong_time + 1) / (right_time + wrong_time + 2) * 10000);
+            if (i > 0) {
+                question_weight[i] = question_weight[i] + question_weight[i - 1];
+            }
+        }
+        for (int j = 0; j < questionNum; j++) {
+            if (question_weight[num - 1] == 0) {
+                break;
+            }
+            int random = arc4random() % question_weight[num - 1] + 1;
+            int k = 0;
+            for (; k < num; k++) {
+                if (random <= question_weight[k]) {
+                    break;
+                }
+            }
+            [return_array addObject:questions[k]];
+            int choose_weight = question_weight[k];
+            if (k != 0) {
+                choose_weight = question_weight[k] - question_weight[k - 1];
+            }
+            for (; k < num; k++) {
+                question_weight[k] = question_weight[k] - choose_weight;
+            }
+        }
+    }
+    //随机出题
+    else {
+        int j = 0;
+        for (int i = num; i > 1; i--) {
+            if (j >= questionNum) {
+                break;
+            }
+            int random = arc4random() % i;
+            if (random != i - 1) {
+                id temp = questions[random];
+                questions[random] = questions[i - 1];
+                questions[i - 1] = temp;
+            }
+            [return_array addObject:questions[i - 1]];
+            j++;
+        }
+    }
+    [self shuffle:return_array];
+    
+    return return_array;
+}
+
 //显示答案
-- (void)showAnswer{
+- (void)showAnswer: (id)sender{
     isShowAnswer = true;
     AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     NSManagedObjectContext *context = [appDelegate managedObjectContext];
@@ -50,7 +135,13 @@
     [context deleteObject:history];
     [appDelegate saveContext];
     [self.tableView reloadData];
-    [self.navigationItem setRightBarButtonItems:@[]];
+    
+    [popMenu dismissMenu];
+    UIBarButtonItem *moreButton=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"pop_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(showMenu:)];
+    [self.navigationItem setRightBarButtonItems:@[moreButton]];
+    MenuItem *fontItem = [[MenuItem alloc] initWithSegment:@"小,中,大" image:[UIImage imageNamed:@"font_pop"] target:self action:@selector(fontChange:) defaultValue:[appDelegate.settings[@"font"] integerValue]];
+    MenuItem *backgroundItem = [[MenuItem alloc] initWithSegment:@"白天,护眼,夜间" image:[UIImage imageNamed:@"scene_pop"] target:self action:@selector(backgroundChange:) defaultValue:[appDelegate.settings[@"background"] integerValue]];
+    popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
 }
 
 //交卷操作
@@ -70,6 +161,7 @@
             }
         }
     }
+    [popMenu dismissMenu];
     if (hasUndo) {
         //提示有未做题
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"提示" message:@"有未做题，是否提交？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
@@ -275,6 +367,39 @@
     [alert show];
 }
 
+-(void)fontChange:(id)sender{
+    MenuItem *item = (MenuItem *)sender;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    appDelegate.settings[@"font"] = [NSNumber numberWithInteger:item.value];
+    [defaults setObject:[NSNumber numberWithInteger:item.value] forKey:@"font"];
+    [defaults synchronize];
+    [self changeSetting];
+    [self.tableView reloadData];
+}
+
+-(void)backgroundChange:(id)sender{
+    MenuItem *item = (MenuItem *)sender;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    appDelegate.settings[@"background"] = [NSNumber numberWithInteger:item.value];
+    [defaults setObject:[NSNumber numberWithInteger:item.value] forKey:@"background"];
+    [defaults synchronize];
+    [self changeSetting];
+    [self.tableView reloadData];
+}
+
+-(void)showMenu:(id)sender{
+    CGRect frame = CGRectZero;
+    for (UIView *view in [self.navigationController.navigationBar subviews]) {
+        if (view.frame.origin.x >= frame.origin.x) {
+            frame = view.frame;
+        }
+    }
+    frame.origin.y = frame.origin.y + 20;
+    [popMenu showMenuInView:self.navigationController.view fromRect:frame];
+}
+
 - (void)popViewController
 {
     [self.navigationController popViewControllerAnimated:YES];
@@ -300,9 +425,35 @@
     }
 }
 
+- (void)changeSetting{
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
+    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
+    if (background_color == 0) {
+        self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+        self.tableView.sectionIndexBackgroundColor = [UIColor groupTableViewBackgroundColor];
+        if ([self.tableView.tableHeaderView viewWithTag:99]) {
+            ((UILabel *)[self.tableView.tableHeaderView viewWithTag:99]).textColor = [UIColor darkTextColor];
+        }
+    } else if(background_color == 1){
+        self.tableView.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
+        self.tableView.sectionIndexBackgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
+        if ([self.tableView.tableHeaderView viewWithTag:99]) {
+            ((UILabel *)[self.tableView.tableHeaderView viewWithTag:99]).textColor = [UIColor darkTextColor];
+        }
+    } else if(background_color == 2){
+        self.tableView.backgroundColor = [UIColor blackColor];
+        self.tableView.sectionIndexBackgroundColor = [UIColor blackColor];
+        if ([self.tableView.tableHeaderView viewWithTag:99]) {
+            ((UILabel *)[self.tableView.tableHeaderView viewWithTag:99]).textColor = [UIColor lightTextColor];
+        }
+    }
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+
     //增加响应ResignActive事件
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center addObserver:self selector:@selector(applicationWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
@@ -314,14 +465,22 @@
     //索引设置
     self.tableView.sectionIndexColor = [UIColor grayColor];
 
-    UIBarButtonItem *more=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"open"] style:UIBarButtonItemStyleDone target:self action: @selector(popViewController)];
     
-    UIBarButtonItem *nextUndoButton =[[UIBarButtonItem alloc] initWithTitle:@"->未做" style:UIBarButtonItemStyleDone target:self action: @selector(nextUndo)];
-    UIBarButtonItem *nextFaultButton =[[UIBarButtonItem alloc] initWithTitle:@"->错题" style:UIBarButtonItemStyleDone target:self action: @selector(nextFault)];
-    UIBarButtonItem *submitButton =[[UIBarButtonItem alloc] initWithTitle:@"交卷" style:UIBarButtonItemStyleDone target:self action: @selector(submit)];
-    UIBarButtonItem *showAnswerButton =[[UIBarButtonItem alloc] initWithTitle:@"显示答案" style:UIBarButtonItemStyleDone target:self action: @selector(showAnswer)];
-    UIBarButtonItem *barButtonItemLeft2=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"open"] style:UIBarButtonItemStyleDone target:self action: @selector(popViewController)];
+    UIBarButtonItem *nextUndoButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"next_undo_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(nextUndo)];
+    UIBarButtonItem *nextFaultButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"next_wrong_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(nextFault)];
     
+    MenuItem *submitItem = [[MenuItem alloc] initWithButton:@"交卷" image:[UIImage imageNamed:@"submit_pop"] target:self action:@selector(submit)];
+    MenuItem *showAnswerItem = [[MenuItem alloc] initWithButton:@"显示答案" image:[UIImage imageNamed:@"show_answer_pop"] target:self action:@selector(showAnswer:)];
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    MenuItem *fontItem = [[MenuItem alloc] initWithSegment:@"小,中,大" image:[UIImage imageNamed:@"font_pop"] target:self action:@selector(fontChange:) defaultValue:[appDelegate.settings[@"font"] integerValue]];
+    MenuItem *backgroundItem = [[MenuItem alloc] initWithSegment:@"白天,护眼,夜间" image:[UIImage imageNamed:@"scene_pop"] target:self action:@selector(backgroundChange:) defaultValue:[appDelegate.settings[@"background"] integerValue]];
+    
+    UIBarButtonItem *moreButton=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"pop_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(showMenu:)];
+    
+    //加载用户数据
+    isFaultPrefer_setting = [appDelegate.settings[@"isFaultPrefer"] boolValue];
+    isLongPressFavor_setting = [appDelegate.settings[@"isLongPressFavor"] boolValue];
+    BOOL isShowAnswer_setting = [appDelegate.settings[@"isShowAnswer"] boolValue];
 
     //数据初始化
     displayIndexes = [NSMutableArray arrayWithArray:@[@"单", @"多", @"判"]];
@@ -333,10 +492,10 @@
         [historyQuestions addObject:[NSMutableArray array]];
     }
     
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     NSManagedObjectContext *context = [appDelegate managedObjectContext];
     NSError *error;
     
+    //历史记录
     if (isHistory) {
         NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kHistoryQuestion];
         NSPredicate *pred = [NSPredicate predicateWithFormat:@"(history_id = %@)", [history valueForKey:@"id"]];
@@ -347,7 +506,8 @@
         NSArray *history_questions = [context executeFetchRequest:request error:&error];
         //仅显示错题
         if (isShowFault && isSubmit) {
-            [self.navigationItem setRightBarButtonItems:@[]];
+            popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
+            [self.navigationItem setRightBarButtonItems:@[moreButton]];
             for (NSManagedObject *history_question in history_questions) {
                 //答题错误
                 if (![[history_question valueForKey:@"correct"] boolValue]) {
@@ -364,9 +524,16 @@
             }
         } else {
             if (isSubmit) {
-                [self.navigationItem setRightBarButtonItems:@[nextFaultButton]];
+                popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
+                [self.navigationItem setRightBarButtonItems:@[moreButton, nextFaultButton]];
             } else {
-               [self.navigationItem setRightBarButtonItems:@[nextUndoButton, submitButton, showAnswerButton]]; 
+                if (isExam) {
+                    popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, fontItem, backgroundItem]];
+                    [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
+                } else {
+                    popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, showAnswerItem, fontItem, backgroundItem]];
+                    [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
+                }
             }
             for (NSManagedObject *history_question in history_questions) {
                 NSFetchRequest *request1 = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
@@ -380,16 +547,58 @@
                 }
             }
         }
-    } else {
+    }
+    //非历史记录
+    else {
+        //刷题
         if (!isExam) {
-            [self.navigationItem setRightBarButtonItems:@[nextUndoButton, submitButton, showAnswerButton]];
-            
+            //默认显示答案
+            if (isShowAnswer_setting) {
+                popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
+                [self.navigationItem setRightBarButtonItems:@[moreButton]];
+            } else {
+                popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, showAnswerItem, fontItem, backgroundItem]];
+                [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
+            }
             NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
             NSPredicate *pred = [NSPredicate predicateWithFormat:@"(section_id = %@)", [sections[0] valueForKey:@"id"]];
             [request setPredicate:pred];
-            NSArray *questions = [context executeFetchRequest:request error:&error];
-            
-            
+            NSMutableArray *questions = [[context executeFetchRequest:request error:&error] mutableCopy];
+            [self shuffle:questions];
+            for (NSManagedObject *question in questions) {
+                [displayQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
+            }
+        }
+        //智能出题
+        else {
+            popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, fontItem, backgroundItem]];
+            [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
+            NSMutableArray *tempQuestions = [NSMutableArray array];
+            for (NSString *index in displaySections) {
+                [tempQuestions addObject:[NSMutableArray array]];
+            }
+            for (NSManagedObject *section in sections) {
+                NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
+                NSPredicate *pred = [NSPredicate predicateWithFormat:@"(section_id = %@)", [section valueForKey:@"id"]];
+                [request setPredicate:pred];
+                NSArray *questions = [context executeFetchRequest:request error:&error];
+                if (questions != nil) {
+                    for (NSManagedObject *question in questions) {
+                        [tempQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
+                    }
+                }
+            }
+            int i = 0;
+            for (NSString *index in displaySections) {
+                displayQuestions[i] = [self generateQuestion:tempQuestions[i] withQuestionNum:60 andFaultPrefer:isFaultPrefer_setting];
+                i++;
+            }
+        }
+        //默不显示答案
+        if (!isExam && isShowAnswer_setting) {
+            isShowAnswer = YES;
+        } else {
+            //初始化历史
             int history_id = (int) [[NSDate date] timeIntervalSince1970];
             NSFetchRequest *history_request = [[NSFetchRequest alloc] initWithEntityName:kHistory];
             NSPredicate *history_pred = [NSPredicate predicateWithFormat:@"(id = %d)", history_id];
@@ -402,10 +611,13 @@
             }
             [history setValue:[NSNumber numberWithInt:history_id] forKey:@"id"];
             [history setValue:[NSDate date] forKey:@"date"];
-            [history setValue:[NSNumber numberWithBool:NO] forKey:@"isExam"];
-            [history setValue:[sections[0] valueForKey:@"name"] forKey:@"section_name"];
+            [history setValue:[NSNumber numberWithBool:isExam] forKey:@"isExam"];
+            if (!isExam) {
+                [history setValue:[sections[0] valueForKey:@"name"] forKey:@"section_name"];
+            }
             [history setValue:[NSNumber numberWithBool:NO] forKey:@"isSubmit"];
-
+            
+            //初始化历史详细记录
             NSFetchRequest *history_question_request = [[NSFetchRequest alloc] initWithEntityName:kHistoryQuestion];
             NSPredicate *history_question_pred = [NSPredicate predicateWithFormat:@"(history_id = %d)", history_id];
             [history_question_request setPredicate:history_question_pred];
@@ -413,40 +625,49 @@
             for (NSManagedObject *history_question in history_questiones) {
                 [context deleteObject:history_question];
             }
-            
-            //TODO shuffle
-            
             int question_index = 0;
-            for (NSManagedObject *question in questions) {
-                [displayQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
-                NSManagedObject *history_question = [NSEntityDescription insertNewObjectForEntityForName:kHistoryQuestion inManagedObjectContext:context];
-                [history_question setValue:[NSNumber numberWithInt:history_id] forKey:@"history_id"];
-                [history_question setValue:[question valueForKey:@"id"] forKey:@"question_id"];
-                [history_question setValue:[NSNumber numberWithInt:(history_id * 1000 + question_index)] forKey:@"id"];
-                [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose1"];
-                [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose2"];
-                [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose3"];
-                [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose4"];
-                [historyQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:history_question];
-                question_index++;
-            }
-            int question_number = 1;
-            for (NSArray *history_question_section in historyQuestions) {
-                for (NSManagedObject *history_question in history_question_section) {
-                    [history_question setValue:[NSNumber numberWithInt:question_number] forKey:@"question_number"];
-                    question_number++;
+            int section_index = 0;
+            for (NSArray *question_section in displayQuestions) {
+                for (NSManagedObject *question in question_section) {
+                    NSManagedObject *history_question = [NSEntityDescription insertNewObjectForEntityForName:kHistoryQuestion inManagedObjectContext:context];
+                    [history_question setValue:[NSNumber numberWithInt:history_id] forKey:@"history_id"];
+                    [history_question setValue:[question valueForKey:@"id"] forKey:@"question_id"];
+                    [history_question setValue:[NSNumber numberWithInt:(history_id * 1000 + question_index)] forKey:@"id"];
+                    [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose1"];
+                    [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose2"];
+                    [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose3"];
+                    [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose4"];
+                    [history_question setValue:[NSNumber numberWithInt:(question_index + 1)] forKey:@"question_number"];
+                    [historyQuestions[section_index] addObject:history_question];
+                    question_index++;
                 }
+                section_index++;
             }
-        } else {
-            //TODO
         }
     }
-
+    
+    //表头
+    if (!isExam) {
+        CGRect frameRect = CGRectMake(0, 0, self.tableView.frame.size.width - 20, 30);
+        UIView *header = [[UIView alloc] initWithFrame:frameRect];
+        CGRect label_rect = CGRectMake(0, 0, self.tableView.frame.size.width, 20);
+        UILabel *label = [[UILabel alloc] initWithFrame:label_rect];
+        label.tag = 99;
+        label.font = [UIFont systemFontOfSize:13];
+        label.textAlignment = NSTextAlignmentCenter;
+        if (isHistory) {
+            label.text= [history valueForKey:@"section_name"];
+        } else{
+            label.text= [sections[0] valueForKey:@"name"];
+        }
+        [header addSubview:label];
+        self.tableView.tableHeaderView = header;
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
         NSIndexSet *indexSet=[[NSIndexSet alloc]initWithIndex:0];
         [self.tableView reloadSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
     });
-    
+    //[self changeSetting];
     
     
     // Uncomment the following line to preserve selection between presentations.
@@ -454,6 +675,11 @@
     
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [self changeSetting];
+    [self.tableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -514,7 +740,7 @@
         }
     }
     
-    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 #pragma mark -Scroll view delegate
@@ -558,8 +784,13 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     QuestionTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Question" forIndexPath:indexPath];
+    [cell refreshBackgroundAndFont];
+    
     NSManagedObject *object = displayQuestions[indexPath.section][indexPath.row];
-    NSManagedObject *history_question = historyQuestions[indexPath.section][indexPath.row];
+    NSManagedObject *history_question;
+    if (!isShowAnswer) {
+        history_question = historyQuestions[indexPath.section][indexPath.row];
+    }
     cell.favoriteImage.highlighted = [[object valueForKey:@"isFavorite"] boolValue];
 
     NSArray *choice_head = @[@"A", @"B", @"C", @"D"];
@@ -586,9 +817,9 @@
                 }
             }
             if ([(NSString *)[object valueForKey:@"answer"] containsString:choice_head[i - 1]]) {
-                choice.textColor = [UIColor greenColor];
+                choice.textColor = [UIColor blueColor];
             } else {
-                choice.textColor = [UIColor blackColor];
+                choice.textColor = cell.defaultTextColor;
             }
         }
         cell.analysis.text = ([object valueForKey:@"analysis"]) ? [NSString stringWithFormat:@"【答案】%@\n【解析】%@", [object valueForKey:@"answer"], [object valueForKey:@"analysis"]] : [NSString stringWithFormat:@"【答案】%@", [object valueForKey:@"answer"]];
@@ -602,18 +833,18 @@
             if ([[history_question valueForKey:chooseId] boolValue]) {
                 choice.textColor = [UIColor blueColor];
             } else {
-                choice.textColor = [UIColor blackColor];
+                choice.textColor = cell.defaultTextColor;
             }
             if ([object valueForKey:choiceId]) {
-                BOOL isCorrect = YES;
+                BOOL isRight = YES;
                 NSString *correct_sign = @"✓";
-                if ([(NSString *)[object valueForKey:@"answer"] containsString:choice_head[i - 1]] ^ [[history_question valueForKey:chooseId] boolValue]) {
-                    correct_sign = @"✕";
-                    isCorrect = NO;
+                if (![(NSString *)[object valueForKey:@"answer"] containsString:choice_head[i - 1]]) {
+                    correct_sign = @"　";
+                    isRight = NO;
                 }
                 NSMutableAttributedString *choice_str = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@%@. %@", correct_sign, choice_head[i - 1], [object valueForKey:choiceId]]];
-                if (isCorrect) {
-                    [choice_str addAttribute:NSForegroundColorAttributeName value:[UIColor greenColor] range:NSMakeRange(0,1)];
+                if (isRight) {
+                    [choice_str addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
                 } else {
                     [choice_str addAttribute:NSForegroundColorAttributeName value:[UIColor redColor] range:NSMakeRange(0,1)];
                 }
@@ -632,7 +863,7 @@
         if (![[history_question valueForKey:@"correct"] boolValue]) {
             cell.analysis.textColor = [UIColor redColor];
         } else {
-            cell.analysis.textColor = [UIColor greenColor];
+            cell.analysis.textColor = [UIColor blueColor];
         }
         cell.analysis.text = ([object valueForKey:@"analysis"]) ? [NSString stringWithFormat:@"【答案】%@\n【解析】%@", [object valueForKey:@"answer"], [object valueForKey:@"analysis"]] : [NSString stringWithFormat:@"【答案】%@", [object valueForKey:@"answer"]];
     } else {
@@ -651,7 +882,7 @@
                 if ([[history_question valueForKey:chooseId] boolValue]) {
                     choice.textColor = [UIColor blueColor];
                 } else {
-                    choice.textColor = [UIColor blackColor];
+                    choice.textColor = cell.defaultTextColor;
                 }
             } else {
                 choice.text = nil;
@@ -668,13 +899,16 @@
         [cell removeGestureRecognizer:gestureRecognizer];
     }
 
-    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(cellLongPress:)];
-    if ([[cell gestureRecognizers] count] == 0) {
-        [cell addGestureRecognizer:longPress];
+    if (isLongPressFavor_setting) {
+        if ([[cell gestureRecognizers] count] == 0) {
+            UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(cellLongPress:)];
+            [cell addGestureRecognizer:longPress];
+        }
     }
     
-    UITapGestureRecognizer *imageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageTap:)];
+    
     if ([[cell.favoriteImage gestureRecognizers] count] == 0) {
+        UITapGestureRecognizer *imageTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageTap:)];
         [cell.favoriteImage addGestureRecognizer:imageTap];
     }
     
@@ -683,6 +917,10 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
     return displaySections[section];
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 20;
 }
 
 - (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView{

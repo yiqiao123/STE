@@ -9,6 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "AppDelegate.h"
 
-@interface HistoryTableViewController : UITableViewController
+@interface HistoryTableViewController : UITableViewController<UIAlertViewDelegate>
 
 @end

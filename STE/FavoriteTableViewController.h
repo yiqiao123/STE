@@ -11,6 +11,6 @@
 #import "FavoriteTableViewCell.h"
 #import "ChaptersAndSections.h"
 
-@interface FavoriteTableViewController : UITableViewController
+@interface FavoriteTableViewController : UITableViewController<UIAlertViewDelegate>
 
 @end

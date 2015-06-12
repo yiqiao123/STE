@@ -12,6 +12,7 @@
 
 @property (assign, nonatomic) NSInteger level;
 @property (assign, nonatomic) BOOL isExpand;
+@property (assign, nonatomic) BOOL isSelected;
 
 - (instancetype) initWithObject: (id)object andLevel: (NSInteger) node_level;
 -(void) addChild: (TreeNode *) child;
@@ -19,5 +20,7 @@
 -(BOOL) isLeaf;
 -(id) value;
 -(NSArray*) children;
+-(void) select;
+-(void) unSelect;
 
 @end

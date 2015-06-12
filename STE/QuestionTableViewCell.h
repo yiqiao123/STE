@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AppDelegate.h"
 
 @interface QuestionTableViewCell : UITableViewCell
 @property (strong, nonatomic) IBOutlet UILabel *content;
@@ -16,5 +17,8 @@
 @property (strong, nonatomic) IBOutlet UILabel *choice4;
 @property (strong, nonatomic) IBOutlet UILabel *analysis;
 @property (strong, nonatomic) IBOutlet UIImageView *favoriteImage;
+@property (strong, nonatomic) UIColor *defaultTextColor;
+
+- (void)refreshBackgroundAndFont;
 
 @end

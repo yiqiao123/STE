@@ -38,10 +38,51 @@
         ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"";
     }
     
+    [self changeSetting];
+}
+
+- (void)changeSetting{
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
+    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
+    if (background_color == 0) {
+        self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+        if ([self.tableView.tableFooterView viewWithTag:99]) {
+            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor darkTextColor];
+        }
+    } else if(background_color == 1){
+        self.tableView.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
+        if ([self.tableView.tableFooterView viewWithTag:99]) {
+            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor darkTextColor];
+        }
+    } else if(background_color == 2){
+        self.tableView.backgroundColor = [UIColor blackColor];
+        if ([self.tableView.tableFooterView viewWithTag:99]) {
+            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor lightTextColor];
+        }
+    }
+}
+
+- (void)clearAll{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"提示" message:@"是否清除所有答题历史？" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+    [alert show];
+}
+
+- (void)clearAllProcess{
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    NSManagedObjectContext *context = [appDelegate managedObjectContext];
+    for (NSManagedObject *history in displayHistorys) {
+        [context deleteObject:history];
+    }
+    [appDelegate saveContext];
+    [self refreshData];
+    [self.tableView reloadData];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    UIBarButtonItem *clearAllButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"trash_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(clearAll)];
+    [self.navigationItem setRightBarButtonItems:@[clearAllButton]];
     
     UIView *footer =[[UIView alloc] initWithFrame:CGRectZero];
     
@@ -49,16 +90,14 @@
     float height = 40;
     CGRect theRect = CGRectMake((self.tableView.frame.size.width - width) / 2, (self.tableView.frame.size.height- self.navigationController.navigationBar.frame.size.height - 20 - self.tabBarController.tabBar.frame.size.height - height) / 2, width, height);
     UILabel *test = [[UILabel alloc] initWithFrame:theRect];
-    test.font = [UIFont fontWithName:@"Arial" size:30];
+    test.font = [UIFont systemFontOfSize:30];
     test.textAlignment = NSTextAlignmentCenter;
     test.tag = 99;
     [footer addSubview:test];
     self.tableView.tableFooterView = footer;
     
-    self.title = @"答题历史";
-    
     displayHistorys = [NSMutableArray array];
-    [self refreshData];
+    //[self refreshData];
     
     
     // Uncomment the following line to preserve selection between presentations.
@@ -95,7 +134,7 @@
         qtvc.isSubmit = NO;
         qtvc.isShowFault = NO;
         qtvc.isExam = [[history valueForKey:@"isExam"] boolValue];
-        qtvc.title = [[history valueForKey:@"isExam"] boolValue] ? @"智能出题" : [history valueForKey:@"section_name"];
+        qtvc.title = [[history valueForKey:@"isExam"] boolValue] ? @"智能出题" : @"刷题";
         [temp pushViewController:qtvc animated:YES];
     }
     //已提交
@@ -111,6 +150,14 @@
     
 }
 
+#pragma mark - Alert view delegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == 1) {
+        [self clearAllProcess];
+    }
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -124,6 +171,20 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"history_cell" forIndexPath:indexPath];
+    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
+    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
+    if (background_color == 0) {
+        cell.backgroundColor = [UIColor whiteColor];
+        cell.textLabel.textColor = [UIColor darkTextColor];
+    } else if(background_color == 1){
+        cell.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
+        cell.textLabel.textColor = [UIColor darkTextColor];
+    } else if(background_color == 2){
+        cell.backgroundColor = [UIColor blackColor];
+        cell.textLabel.textColor = [UIColor lightTextColor];
+    }    
+    
     NSManagedObject *history = displayHistorys[indexPath.row];
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
     dateFormatter.dateFormat = @"yyyy年MM月dd日 hh:mm";
@@ -177,7 +238,14 @@
         [appDelegate saveContext];
         
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        if ([displayHistorys count] == 0) {
+            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"暂无历史记录！";
+        }
     }
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return @"删除";
 }
 
 

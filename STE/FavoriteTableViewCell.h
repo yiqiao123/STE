@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AppDelegate.h"
 
 @interface FavoriteTableViewCell : UITableViewCell
 @property (strong, nonatomic) IBOutlet UILabel *content;
@@ -19,4 +20,7 @@
 @property (strong, nonatomic) IBOutlet UILabel *favorite_time;
 @property (strong, nonatomic) IBOutlet UILabel *chapter;
 @property (strong, nonatomic) IBOutlet UILabel *section;
+@property (strong, nonatomic) UIColor *defaultTextColor;
+
+- (void)refreshBackgroundAndFont;
 @end

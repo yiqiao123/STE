@@ -27,6 +27,7 @@
         _isExpand = NO;
         _isLeaf = YES;
         _level = node_level;
+        _isSelected = NO;
     }
     return self;
 }
@@ -58,6 +59,20 @@
 -(id) value
 {
     return _value;
+}
+
+-(void) select{
+    _isSelected = YES;
+    for (TreeNode *child in _children) {
+        [child select];
+    }
+}
+
+-(void) unSelect{
+    _isSelected = NO;
+    for (TreeNode *child in _children) {
+        [child unSelect];
+    }
 }
 
 @end
