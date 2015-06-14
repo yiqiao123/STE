@@ -35,7 +35,7 @@
     
     UIStoryboard *mainStoryBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     QuestionTableViewController *qtvc = [mainStoryBoard instantiateViewControllerWithIdentifier:@"QuestionTableView"];
-    qtvc.title = @"智能出题";
+    qtvc.title = @"";
     qtvc.sections = sections;
     qtvc.isExam = YES;
     qtvc.isHistory = NO;

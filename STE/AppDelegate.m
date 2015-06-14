@@ -18,7 +18,8 @@
 @implementation AppDelegate
 @synthesize settings;
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    [NSThread sleepForTimeInterval:1];
     settings = [NSMutableDictionary dictionary];
     settings[@"font"] = @1;
     settings[@"background"] = @0;

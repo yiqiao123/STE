@@ -227,7 +227,7 @@
     NSIndexPath *indexPath = [self.tableView indexPathForCell:(UITableViewCell *)[[sender superview] superview]];
     QuestionTableViewController *quesTVC = segue.destinationViewController;
     NSManagedObject *section = [(TreeNode *)self.display_items[indexPath.row] value];
-    quesTVC.title = @"刷题";
+    quesTVC.title = @"";
     quesTVC.sections = [NSArray arrayWithObjects:section, nil];
     quesTVC.isExam = NO;
     quesTVC.isHistory = NO;

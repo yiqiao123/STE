@@ -696,6 +696,27 @@
         [object setValue: [NSNumber numberWithBool: ![[object valueForKey:@"isFavorite"] boolValue]]   forKey:@"isFavorite"];
         [object setValue:[NSDate date] forKey:@"favorite_date"];
         cell.favoriteImage.highlighted = !cell.favoriteImage.highlighted;
+        
+        CGFloat tipsWidth = 80.f;
+        CGFloat tipsHeight = 40.f;
+        CGRect tipsViewFrame = (CGRect){(self.tableView.frame.size.width - tipsWidth) / 2, (self.navigationController.view.frame.size.height + 20 + self.navigationController.navigationBar.frame.size.height - tipsHeight) / 2, tipsWidth, tipsHeight};
+        UILabel *tips = [[UILabel alloc] initWithFrame:tipsViewFrame];
+        tips.textColor = [UIColor whiteColor];
+        tips.backgroundColor = cell.defaultTextColor;
+        tips.textAlignment = NSTextAlignmentCenter;
+        tips.alpha = 0.7f;
+        if([[object valueForKey:@"isFavorite"] boolValue]){
+            tips.text = @"已收藏";
+        } else {
+            tips.text = @"已取消";
+        }
+        [self.navigationController.view addSubview:tips];
+        [UIView animateWithDuration:2 animations:^{
+            tips.alpha = 0.0f;
+        } completion:^(BOOL finished){
+            [tips removeFromSuperview];
+        }];
+        
         AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
         [appDelegate saveContext];
     }
@@ -709,6 +730,27 @@
     [object setValue: [NSNumber numberWithBool: ![[object valueForKey:@"isFavorite"] boolValue]]   forKey:@"isFavorite"];
     [object setValue:[NSDate date] forKey:@"favorite_date"];
     cell.favoriteImage.highlighted = !cell.favoriteImage.highlighted;
+    
+    CGFloat tipsWidth = 80.f;
+    CGFloat tipsHeight = 40.f;
+    CGRect tipsViewFrame = (CGRect){(self.tableView.frame.size.width - tipsWidth) / 2, (self.navigationController.view.frame.size.height + 20 + self.navigationController.navigationBar.frame.size.height - tipsHeight) / 2, tipsWidth, tipsHeight};
+    UILabel *tips = [[UILabel alloc] initWithFrame:tipsViewFrame];
+    tips.textColor = [UIColor whiteColor];
+    tips.backgroundColor = cell.defaultTextColor;
+    tips.textAlignment = NSTextAlignmentCenter;
+    tips.alpha = 0.7f;
+    if([[object valueForKey:@"isFavorite"] boolValue]){
+        tips.text = @"已收藏";
+    } else {
+        tips.text = @"已取消";
+    }
+    [self.navigationController.view addSubview:tips];
+    [UIView animateWithDuration:2 animations:^{
+        tips.alpha = 0.0f;
+    } completion:^(BOOL finished){
+        [tips removeFromSuperview];
+    }];
+    
     AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     [appDelegate saveContext];
 }
@@ -739,8 +781,8 @@
             [history_object setValue:[NSNumber numberWithBool: YES] forKey:chooseId];
         }
     }
-    
-    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    [self.tableView reloadData];
+    //[self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 #pragma mark -Scroll view delegate
