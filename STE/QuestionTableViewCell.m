@@ -21,40 +21,31 @@
 }
 
 - (void)refreshBackgroundAndFont{
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    int font_size = (int)[appDelegate.settings[@"font"] integerValue];
-    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
-    if (background_color == 0) {
-        self.backgroundColor = [UIColor whiteColor];
-        self.defaultTextColor = [UIColor darkTextColor];
-    } else if(background_color == 1){
-        self.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-        self.defaultTextColor = [UIColor darkTextColor];
-    } else if(background_color == 2){
-        self.backgroundColor = [UIColor blackColor];
-        self.defaultTextColor = [UIColor lightTextColor];
-    }
+    STESettings *settings = [STESettings shared];
+    self.backgroundColor = settings.backgroundColor;
+    self.defaultTextColor = settings.textColor;
+
     self.content.textColor = self.defaultTextColor;
     self.choice1.textColor = self.defaultTextColor;
     self.choice2.textColor = self.defaultTextColor;
     self.choice3.textColor = self.defaultTextColor;
     self.choice4.textColor = self.defaultTextColor;
     self.analysis.textColor = self.defaultTextColor;
-    if (font_size == 0) {
+    if (settings.font == STEFontSizeSmall) {
         self.content.font = [UIFont systemFontOfSize:13];
         self.choice1.font = [UIFont systemFontOfSize:13];
         self.choice2.font = [UIFont systemFontOfSize:13];
         self.choice3.font = [UIFont systemFontOfSize:13];
         self.choice4.font = [UIFont systemFontOfSize:13];
         self.analysis.font = [UIFont systemFontOfSize:13];
-    } else if (font_size == 1) {
+    } else if (settings.font == STEFontSizeMiddle) {
         self.content.font = [UIFont systemFontOfSize:17];
         self.choice1.font = [UIFont systemFontOfSize:17];
         self.choice2.font = [UIFont systemFontOfSize:17];
         self.choice3.font = [UIFont systemFontOfSize:17];
         self.choice4.font = [UIFont systemFontOfSize:17];
         self.analysis.font = [UIFont systemFontOfSize:17];
-    } else if (font_size == 2) {
+    } else if (settings.font == STEFontSizeBig) {
         self.content.font = [UIFont systemFontOfSize:21];
         self.choice1.font = [UIFont systemFontOfSize:21];
         self.choice2.font = [UIFont systemFontOfSize:21];

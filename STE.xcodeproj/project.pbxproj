@@ -30,6 +30,8 @@
 		41C306D81B0355DF00C5B527 /* securities.plist in Resources */ = {isa = PBXBuildFile; fileRef = 41C306D71B0355DF00C5B527 /* securities.plist */; };
 		41C306DB1B0366DA00C5B527 /* QuestionTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C306DA1B0366DA00C5B527 /* QuestionTableViewCell.m */; };
 		41C306E11B03675000C5B527 /* QuestionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C306E01B03675000C5B527 /* QuestionTableViewController.m */; };
+		41C5DDBA1B5A391A008E3BB5 /* STESettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C5DDB91B5A391A008E3BB5 /* STESettings.m */; };
+		41C5DDBD1B5B9B8A008E3BB5 /* AnswerSheetView.m in Sources */ = {isa = PBXBuildFile; fileRef = 41C5DDBC1B5B9B8A008E3BB5 /* AnswerSheetView.m */; };
 		41F205CE1B26029E009DF0E1 /* PopupMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F205C71B26029E009DF0E1 /* PopupMenu.m */; };
 		41F205CF1B26029E009DF0E1 /* MenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F205C91B26029E009DF0E1 /* MenuView.m */; };
 		41F205D01B26029E009DF0E1 /* MenuOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 41F205CB1B26029E009DF0E1 /* MenuOverlay.m */; };
@@ -91,6 +93,10 @@
 		41C306DA1B0366DA00C5B527 /* QuestionTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuestionTableViewCell.m; sourceTree = "<group>"; };
 		41C306DF1B03675000C5B527 /* QuestionTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuestionTableViewController.h; sourceTree = "<group>"; };
 		41C306E01B03675000C5B527 /* QuestionTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuestionTableViewController.m; sourceTree = "<group>"; };
+		41C5DDB81B5A391A008E3BB5 /* STESettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STESettings.h; sourceTree = "<group>"; };
+		41C5DDB91B5A391A008E3BB5 /* STESettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STESettings.m; sourceTree = "<group>"; };
+		41C5DDBB1B5B9B8A008E3BB5 /* AnswerSheetView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnswerSheetView.h; sourceTree = "<group>"; };
+		41C5DDBC1B5B9B8A008E3BB5 /* AnswerSheetView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AnswerSheetView.m; sourceTree = "<group>"; };
 		41F205C61B26029E009DF0E1 /* PopupMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PopupMenu.h; sourceTree = "<group>"; };
 		41F205C71B26029E009DF0E1 /* PopupMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PopupMenu.m; sourceTree = "<group>"; };
 		41F205C81B26029E009DF0E1 /* MenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuView.h; sourceTree = "<group>"; };
@@ -143,6 +149,8 @@
 			isa = PBXGroup;
 			children = (
 				41F205E21B288D2C009DF0E1 /* Image.xcassets */,
+				41C5DDBB1B5B9B8A008E3BB5 /* AnswerSheetView.h */,
+				41C5DDBC1B5B9B8A008E3BB5 /* AnswerSheetView.m */,
 				41C306DF1B03675000C5B527 /* QuestionTableViewController.h */,
 				41C306E01B03675000C5B527 /* QuestionTableViewController.m */,
 				41C306D91B0366DA00C5B527 /* QuestionTableViewCell.h */,
@@ -181,6 +189,8 @@
 				41B2C2421B00F2810009B582 /* TreeNode.m */,
 				4193E43B1B14CC6000C59DED /* ChaptersAndSections.h */,
 				4193E43C1B14CC6000C59DED /* ChaptersAndSections.m */,
+				41C5DDB81B5A391A008E3BB5 /* STESettings.h */,
+				41C5DDB91B5A391A008E3BB5 /* STESettings.m */,
 			);
 			path = STE;
 			sourceTree = "<group>";
@@ -275,6 +285,7 @@
 				TargetAttributes = {
 					41327CD41AF91F6E004D3AF3 = {
 						CreatedOnToolsVersion = 6.3;
+						DevelopmentTeam = SFEK395MS5;
 					};
 					41327CF01AF91F6E004D3AF3 = {
 						CreatedOnToolsVersion = 6.3;
@@ -336,6 +347,7 @@
 				41F205D01B26029E009DF0E1 /* MenuOverlay.m in Sources */,
 				41B2C2401B00E81F0009B582 /* QuestionBankTableViewController.m in Sources */,
 				41F205CE1B26029E009DF0E1 /* PopupMenu.m in Sources */,
+				41C5DDBD1B5B9B8A008E3BB5 /* AnswerSheetView.m in Sources */,
 				41C306D21B02503A00C5B527 /* QuestionBankTableViewCell.m in Sources */,
 				413EA8881B1B52F7009BC6B8 /* MoreSegmentTableViewCell.m in Sources */,
 				4193E43D1B14CC6000C59DED /* ChaptersAndSections.m in Sources */,
@@ -347,6 +359,7 @@
 				4193E42D1B12244600C59DED /* QuestionResultViewController.m in Sources */,
 				4193E4431B16282B00C59DED /* ExamTableViewCell.m in Sources */,
 				4193E4371B1383A200C59DED /* FavoriteTableViewCell.m in Sources */,
+				41C5DDBA1B5A391A008E3BB5 /* STESettings.m in Sources */,
 				41327CDB1AF91F6E004D3AF3 /* main.m in Sources */,
 				413EA88B1B1B5307009BC6B8 /* MoreSwitchTableViewCell.m in Sources */,
 				41C306E11B03675000C5B527 /* QuestionTableViewController.m in Sources */,
@@ -476,9 +489,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = STE/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -487,9 +503,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = STE/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

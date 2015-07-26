@@ -22,6 +22,7 @@
 @property (strong, nonatomic) IBOutlet UILabel *mutiple_total_points;
 @property (strong, nonatomic) IBOutlet UILabel *judge_points;
 @property (strong, nonatomic) IBOutlet UILabel *judge_total_points;
+@property (strong, nonatomic) IBOutlet UIScrollView *resultScrollView;
 - (IBAction)wrongAnalysis:(id)sender;
 - (IBAction)allAnalysis:(id)sender;
 @property (strong, nonatomic) IBOutlet UIButton *wrong_analysis_button;

@@ -7,6 +7,7 @@
 //
 
 #import "ChaptersAndSections.h"
+#import "AppDelegate.h"
 
 @interface ChaptersAndSections()
 @property (strong, nonatomic) NSMutableDictionary *chapters;
@@ -21,12 +22,12 @@
 @synthesize chapterToSection;
 
 + (instancetype)shared{
-    static ChaptersAndSections *shared = nil;
+    static ChaptersAndSections *sharedChaptersAndSections = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        shared = [[self alloc] init];
+        sharedChaptersAndSections = [[self alloc] init];
     });
-    return shared;
+    return sharedChaptersAndSections;
 }
 
 - (instancetype)init{

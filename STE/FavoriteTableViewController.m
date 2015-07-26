@@ -21,64 +21,67 @@
 @synthesize popMenu;
 
 - (void)refreshData{
-    [self.displayQuestions removeAllObjects];
-    [self.chapter_names removeAllObjects];
-    [self.section_names removeAllObjects];
-    ChaptersAndSections *chaptersAndSections = [ChaptersAndSections shared];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    NSManagedObjectContext *context = [appDelegate managedObjectContext];
-    NSError *error;
-    NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
-    NSPredicate *pred = [NSPredicate predicateWithFormat:@"(isFavorite = %d)", YES];
-    [request setPredicate:pred];
-    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"favorite_date" ascending:NO];
-    NSArray * sortDescriptors = [NSArray arrayWithObject: sort];
-    [request setSortDescriptors:sortDescriptors];
-    NSArray *questions = [context executeFetchRequest:request error:&error];
-    for (NSManagedObject *question in questions) {
-        [self.displayQuestions addObject:question];
-        NSManagedObject *section = [chaptersAndSections sectionWithId:[question valueForKey:@"section_id"]];
-        if (section) {
-            [self.section_names addObject:[section valueForKey:@"name"]];
-            NSManagedObject *chapter = [chaptersAndSections chapterWithId:[section valueForKey:@"chapter_id"]];
-            if (chapter) {
-                [self.chapter_names addObject:[chapter valueForKey:@"name"]];
-            } else {
-                [self.chapter_names addObject:@""];
-            }
-        } else {
-            [self.section_names addObject:@""];
-            [self.chapter_names addObject:@""];
+    for (UIView *subview in [self.tableView.tableFooterView subviews]) {
+        if ([subview class] == [UIActivityIndicatorView class]) {
+            [(UIActivityIndicatorView *)subview startAnimating];
         }
     }
-
-    if ([self.displayQuestions count] == 0) {
-        ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"暂无收藏！";
-    } else {
-        ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"";
-    }
-    [self changeSetting];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self.displayQuestions removeAllObjects];
+        [self.chapter_names removeAllObjects];
+        [self.section_names removeAllObjects];
+        ChaptersAndSections *chaptersAndSections = [ChaptersAndSections shared];
+        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        NSManagedObjectContext *context = [appDelegate managedObjectContext];
+        NSError *error;
+        NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
+        NSPredicate *pred = [NSPredicate predicateWithFormat:@"(isFavorite = %d)", YES];
+        [request setPredicate:pred];
+        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"favorite_date" ascending:NO];
+        NSArray * sortDescriptors = [NSArray arrayWithObject: sort];
+        [request setSortDescriptors:sortDescriptors];
+        NSArray *questions = [context executeFetchRequest:request error:&error];
+        for (NSManagedObject *question in questions) {
+            [self.displayQuestions addObject:question];
+            NSManagedObject *section = [chaptersAndSections sectionWithId:[question valueForKey:@"section_id"]];
+            if (section) {
+                [self.section_names addObject:[section valueForKey:@"name"]];
+                NSManagedObject *chapter = [chaptersAndSections chapterWithId:[section valueForKey:@"chapter_id"]];
+                if (chapter) {
+                    [self.chapter_names addObject:[chapter valueForKey:@"name"]];
+                } else {
+                    [self.chapter_names addObject:@""];
+                }
+            } else {
+                [self.section_names addObject:@""];
+                [self.chapter_names addObject:@""];
+            }
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            for (UIView *subview in [self.tableView.tableFooterView subviews]) {
+                if ([subview class] == [UIActivityIndicatorView class]) {
+                    [(UIActivityIndicatorView *)subview stopAnimating];
+                }
+            }
+            if ([self.displayQuestions count] == 0) {
+                ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"暂无收藏！";
+            } else {
+                ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"";
+            }
+            [self.tableView reloadData];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSArray *visibleRows = [self.tableView indexPathsForVisibleRows];
+                [self.tableView reloadRowsAtIndexPaths:visibleRows withRowAnimation:UITableViewRowAnimationNone];
+            });
+        });
+    });
 }
 
 - (void)changeSetting{
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
-    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
-    if (background_color == 0) {
-        self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-        if ([self.tableView.tableFooterView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor darkTextColor];
-        }
-    } else if(background_color == 1){
-        self.tableView.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-        if ([self.tableView.tableFooterView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor darkTextColor];
-        }
-    } else if(background_color == 2){
-        self.tableView.backgroundColor = [UIColor blackColor];
-        if ([self.tableView.tableFooterView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor lightTextColor];
-        }
+    STESettings *settings = [STESettings shared];
+    self.tableView.backgroundColor = settings.backgroundColor;
+    if ([self.tableView.tableFooterView viewWithTag:99]) {
+        ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = settings.textColor;
     }
 }
 
@@ -102,22 +105,16 @@
 
 -(void)fontChange:(id)sender{
     MenuItem *item = (MenuItem *)sender;
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    appDelegate.settings[@"font"] = [NSNumber numberWithInteger:item.value];
-    [defaults setObject:[NSNumber numberWithInteger:item.value] forKey:@"font"];
-    [defaults synchronize];
+    STESettings *settings = [STESettings shared];
+    settings.font = item.value;
     [self changeSetting];
     [self.tableView reloadData];
 }
 
 -(void)backgroundChange:(id)sender{
     MenuItem *item = (MenuItem *)sender;
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    appDelegate.settings[@"background"] = [NSNumber numberWithInteger:item.value];
-    [defaults setObject:[NSNumber numberWithInteger:item.value] forKey:@"background"];
-    [defaults synchronize];
+    STESettings *settings = [STESettings shared];
+    settings.background = item.value;
     [self changeSetting];
     [self.tableView reloadData];
 }
@@ -135,13 +132,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
+    STESettings *settings = [STESettings shared];
+    self.navigationController.navigationBar.barStyle = settings.navigationBarStyle;
+    self.navigationController.navigationBar.tintColor = settings.navigationBarTintColor;
     
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     UIBarButtonItem *moreButton=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"pop_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(showMenu:)];
-    MenuItem *fontItem = [[MenuItem alloc] initWithSegment:@"小,中,大" image:[UIImage imageNamed:@"font_pop"] target:self action:@selector(fontChange:) defaultValue:[appDelegate.settings[@"font"] integerValue]];
-    MenuItem *backgroundItem = [[MenuItem alloc] initWithSegment:@"白天,护眼,夜间" image:[UIImage imageNamed:@"scene_pop"] target:self action:@selector(backgroundChange:) defaultValue:[appDelegate.settings[@"background"] integerValue]];
+    MenuItem *fontItem = [[MenuItem alloc] initWithSegment:@"小,中,大" image:[UIImage imageNamed:@"font_pop"] target:self action:@selector(fontChange:) defaultValue:settings.font];
+    MenuItem *backgroundItem = [[MenuItem alloc] initWithSegment:@"白天,护眼,夜间" image:[UIImage imageNamed:@"scene_pop"] target:self action:@selector(backgroundChange:) defaultValue:settings.background];
     popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
     UIBarButtonItem *clearAllButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"trash_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(clearAll)];
     [self.navigationItem setRightBarButtonItems:@[moreButton, clearAllButton]];
@@ -155,8 +152,18 @@
     test.textAlignment = NSTextAlignmentCenter;
     test.tag = 99;
     [footer addSubview:test];
+    
+    UIActivityIndicatorViewStyle style = UIActivityIndicatorViewStyleGray;
+    if (settings.background == STEBackgroundStyleDark) {
+        style = UIActivityIndicatorViewStyleWhite;
+    }
+    UIActivityIndicatorView *activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:style];
+    activityView.frame = CGRectMake((self.tableView.frame.size.width - 20.0f) / 2, (self.tableView.frame.size.height - self.navigationController.navigationBar.frame.size.height - 20 - self.tabBarController.tabBar.frame.size.height - 20.0f) / 2, 20.0f, 20.0f);
+    [footer addSubview:activityView];
+    
     self.tableView.tableFooterView = footer;
-    //self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    
+    
     self.title = @"收藏";
     //自适应
     self.tableView.estimatedRowHeight = 271.0;
@@ -165,11 +172,6 @@
     self.displayQuestions = [NSMutableArray array];
     self.section_names = [NSMutableArray array];
     self.chapter_names = [NSMutableArray array];
-    //[self refreshData];
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        NSArray *visibleRows = [self.tableView indexPathsForVisibleRows];
-//        [self.tableView reloadRowsAtIndexPaths:visibleRows withRowAnimation:UITableViewRowAnimationNone];
-//    });
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
@@ -179,15 +181,13 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self changeSetting];
     [self refreshData];
-    [self.tableView reloadData];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSArray *visibleRows = [self.tableView indexPathsForVisibleRows];
-        [self.tableView reloadRowsAtIndexPaths:visibleRows withRowAnimation:UITableViewRowAnimationNone];
-    });
 }
 
 - (void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
     AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
     [appDelegate saveContext];
 }
@@ -229,24 +229,25 @@
     cell.chapter.text = self.chapter_names[indexPath.row];
     cell.section.text = self.section_names[indexPath.row];
     
-    cell.content.text = [NSString stringWithFormat:@"%ld. %@", indexPath.row + 1, [question valueForKey:@"content"]];
+    cell.content.text = [NSString stringWithFormat:@"%ld. %@", (long)(indexPath.row + 1), [question valueForKey:@"content"]];
     NSArray *choice_head = @[@"A", @"B", @"C", @"D"];
     for (int i = 1; i <= 4; i++) {
         NSString *choiceId = [NSString stringWithFormat:@"choice%d", i];
         UILabel *choice = (UILabel *)[cell viewWithTag:i];
         if ([question valueForKey:choiceId]) {
-            choice.text = [NSString stringWithFormat:@"%@. %@", choice_head[i - 1], [question valueForKey:choiceId]];
+            NSString *correct_sign = @"✓";
+            if (![(NSString *)[question valueForKey:@"answer"] containsString:choice_head[i - 1]]) {
+                correct_sign = @"　";
+            }
+            NSMutableAttributedString *choice_str = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@%@. %@", correct_sign, choice_head[i - 1], [question valueForKey:choiceId]]];
+            [choice_str addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
+            choice.attributedText = choice_str;
         } else {
             choice.text = nil;
         }
-        if ([(NSString *)[question valueForKey:@"answer"] containsString:choice_head[i - 1]]) {
-            choice.textColor = [UIColor blueColor];
-        } else {
-            choice.textColor = cell.defaultTextColor;
-        }
     }
     cell.analysis.text = ([question valueForKey:@"analysis"]) ? [NSString stringWithFormat:@"【答案】%@\n【解析】%@", [question valueForKey:@"answer"], [question valueForKey:@"analysis"]] : [NSString stringWithFormat:@"【答案】%@", [question valueForKey:@"answer"]];
-    cell.correct_rate.text = [NSString stringWithFormat:@"【答题情况】%ld/%ld（正确/总共）", (long)[[question valueForKey:@"right_times"] integerValue], ([[question valueForKey:@"wrong_times"] integerValue] + [[question valueForKey:@"right_times"] integerValue])];
+    cell.correct_rate.text = [NSString stringWithFormat:@"【答题情况】%ld/%ld（正确/总共）", (long)[[question valueForKey:@"right_times"] integerValue], (long)([[question valueForKey:@"wrong_times"] integerValue] + [[question valueForKey:@"right_times"] integerValue])];
     
     return cell;
 }

@@ -18,9 +18,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
+    STESettings *settings = [STESettings shared];
+    self.navigationController.navigationBar.barStyle = settings.navigationBarStyle;
+    self.navigationController.navigationBar.tintColor = settings.navigationBarTintColor;
     
     self.title = @"其他";
     
@@ -65,19 +65,12 @@
 }
 
 - (void)changeSetting{
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
-    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
-    if (background_color == 0) {
-        self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-    } else if(background_color == 1){
-        self.tableView.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-    } else if(background_color == 2){
-        self.tableView.backgroundColor = [UIColor blackColor];
-    }
+    STESettings *settings = [STESettings shared];
+    self.tableView.backgroundColor = settings.backgroundColor;
 }
 
 - (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
     [self changeSetting];
     [self.tableView reloadData];
 }
@@ -91,11 +84,8 @@
     MoreSegmentTableViewCell *cell = (MoreSegmentTableViewCell *)[[sender superview] superview];
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
     NSArray *item = self.displayItems[indexPath.section][indexPath.row];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    appDelegate.settings[item[2]] = [NSNumber numberWithInteger:[cell.setting selectedSegmentIndex]];
-    [defaults setObject:[NSNumber numberWithInteger:[cell.setting selectedSegmentIndex]] forKey:item[2]];
-    [defaults synchronize];
+    STESettings *settings = [STESettings shared];
+    [settings setValue:[NSNumber numberWithInteger:[cell.setting selectedSegmentIndex]] forKey:item[2]];
     [self changeSetting];
     [self.tableView reloadData];
 }
@@ -104,11 +94,8 @@
     MoreSwitchTableViewCell *cell = (MoreSwitchTableViewCell *)[[sender superview] superview];
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
     NSArray *item = self.displayItems[indexPath.section][indexPath.row];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    appDelegate.settings[item[2]] = [NSNumber numberWithBool:cell.setting.isOn];
-    [defaults setObject:[NSNumber numberWithBool:cell.setting.isOn] forKey:item[2]];
-    [defaults synchronize];
+    STESettings *settings = [STESettings shared];
+    [settings setValue:[NSNumber numberWithBool:cell.setting.isOn] forKey:item[2]];
     [self changeSetting];
     [self.tableView reloadData];
 }
@@ -131,23 +118,12 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell;
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+    STESettings *settings = [STESettings shared];
     NSArray *item = self.displayItems[indexPath.section][indexPath.row];
     if ([(NSString *)item[0] compare:@"skip"] == NSOrderedSame) {
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MoreSkip" forIndexPath:indexPath];
-        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-        //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
-        int background_color = (int)[appDelegate.settings[@"background"] integerValue];
-        if (background_color == 0) {
-            cell.backgroundColor = [UIColor whiteColor];
-            cell.textLabel.textColor = [UIColor darkTextColor];
-        } else if(background_color == 1){
-            cell.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-            cell.textLabel.textColor = [UIColor darkTextColor];
-        } else if(background_color == 2){
-            cell.backgroundColor = [UIColor blackColor];
-            cell.textLabel.textColor = [UIColor lightTextColor];
-        }
+        cell.backgroundColor = settings.backgroundColor;
+        cell.textLabel.textColor = settings.textColor;
         cell.textLabel.text = item[1];
         return cell;
     } else if([(NSString *)item[0] compare:@"segment"] == NSOrderedSame){
@@ -160,13 +136,13 @@
                 [cell.setting insertSegmentWithTitle:item[3][i] atIndex:i animated:NO];
             }
         }
-        [cell.setting setSelectedSegmentIndex:[appDelegate.settings[item[2]] integerValue]];
+        [cell.setting setSelectedSegmentIndex:[[settings valueForKey:item[2]] integerValue]];
         return cell;
     } else if([(NSString *)item[0] compare:@"switch"] == NSOrderedSame){
         MoreSwitchTableViewCell *cell = (MoreSwitchTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MoreSwitch" forIndexPath:indexPath];
         [cell refreshBackgroundAndFont];
         cell.title.text = item[1];
-        [cell.setting setOn:[appDelegate.settings[item[2]] boolValue]];
+        [cell.setting setOn:[[settings valueForKey:item[2]] boolValue]];
         return cell;
     }
     return cell;

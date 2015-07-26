@@ -15,7 +15,7 @@
 
 @property (strong, nonatomic) NSMutableArray *displayQuestions;
 @property (strong, nonatomic) NSMutableArray *historyQuestions;
-@property (strong, nonatomic) NSMutableArray *displayIndexes;
+//@property (strong, nonatomic) NSMutableArray *displayIndexes;
 @property (strong, nonatomic) NSMutableArray *displaySections;
 @property (assign, nonatomic) BOOL isToBottom;
 @property (assign, nonatomic) BOOL isToTop;
@@ -23,6 +23,11 @@
 @property (assign, nonatomic) BOOL isFaultPrefer_setting;
 @property (assign, nonatomic) BOOL isLongPressFavor_setting;
 @property (strong, nonatomic) PopupMenu *popMenu;
+
+@property (strong, nonatomic) AnswerSheetView *asView;
+@property (strong, nonatomic) NSMutableArray *questionNumbers;
+@property (strong, nonatomic) NSMutableArray *questionStates;
+
 @end
 
 @implementation QuestionTableViewController
@@ -39,13 +44,17 @@
 @synthesize isLongPressFavor_setting;
 
 @synthesize displayQuestions;
-@synthesize displayIndexes;
+//@synthesize displayIndexes;
 @synthesize displaySections;
 @synthesize historyQuestions;
 @synthesize isToBottom;
 @synthesize isToTop;
 
 @synthesize popMenu;
+
+@synthesize asView;
+@synthesize questionNumbers;
+@synthesize questionStates;
 
 //洗牌
 - (void)shuffle:(NSMutableArray *) array{
@@ -139,22 +148,26 @@
     [popMenu dismissMenu];
     UIBarButtonItem *moreButton=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"pop_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(showMenu:)];
     [self.navigationItem setRightBarButtonItems:@[moreButton]];
-    MenuItem *fontItem = [[MenuItem alloc] initWithSegment:@"小,中,大" image:[UIImage imageNamed:@"font_pop"] target:self action:@selector(fontChange:) defaultValue:[appDelegate.settings[@"font"] integerValue]];
-    MenuItem *backgroundItem = [[MenuItem alloc] initWithSegment:@"白天,护眼,夜间" image:[UIImage imageNamed:@"scene_pop"] target:self action:@selector(backgroundChange:) defaultValue:[appDelegate.settings[@"background"] integerValue]];
+    STESettings *settings = [STESettings shared];
+    MenuItem *fontItem = [[MenuItem alloc] initWithSegment:@"小,中,大" image:[UIImage imageNamed:@"font_pop"] target:self action:@selector(fontChange:) defaultValue:settings.font];
+    MenuItem *backgroundItem = [[MenuItem alloc] initWithSegment:@"白天,护眼,夜间" image:[UIImage imageNamed:@"scene_pop"] target:self action:@selector(backgroundChange:) defaultValue:settings.background];
     popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
+    
+    for (int j = 0; j < [questionStates count]; j++) {
+        for (int i = 0; i < [questionStates[j] count]; i++) {
+            [questionStates[j] replaceObjectAtIndex:i withObject:[NSNumber numberWithInteger:STEQuestionStateUndo]];
+            [[NSNotificationCenter defaultCenter] postNotificationName:nQuestionState object:nil userInfo:@{@"state": [NSNumber numberWithInteger:STEQuestionStateUndo], @"indexPath": [NSIndexPath indexPathForRow:i inSection:j]}];
+        }
+    }
 }
 
 //交卷操作
 - (void)submit
 {
     BOOL hasUndo = false;
-    for (NSArray *history__section_questions in historyQuestions) {
-        for (NSManagedObject *history_question in history__section_questions) {
-            BOOL isDo = NO;
-            for (int j = 1; j <= 4; j++) {
-                isDo = isDo | [[history_question valueForKey:[NSString stringWithFormat:@"choose%d", j]] boolValue];
-            }
-            if (!isDo) {
+    for (NSArray *section_states in questionStates) {
+        for (NSNumber *state in section_states) {
+            if ([state integerValue] == STEQuestionStateUndo) {
                 hasUndo = true;
                 break;
                 break;
@@ -244,7 +257,7 @@
     qrvc.history = self.history;
     qrvc.title = @"答题结果";
     [temp popViewControllerAnimated:NO];
-    [temp pushViewController:qrvc animated:NO];
+    [temp pushViewController:qrvc animated:YES];
 }
 
 
@@ -266,7 +279,7 @@
     }
     if (isToBottom) {
         //current设置为最后一个元素
-        current = [NSIndexPath indexPathForRow:([[historyQuestions lastObject] count] - 1) inSection:([historyQuestions count] - 1)];
+        current = [NSIndexPath indexPathForRow:([[questionStates lastObject] count] - 1) inSection:([questionStates count] - 1)];
     }
     if (isToTop) {
         //current设置为第一个元素
@@ -274,31 +287,26 @@
     }
     
     //遍历整个数组
-    for (int i = (int)current.section; i <= current.section + [historyQuestions count]; i++) {
+    for (int i = (int)current.section; i <= current.section + [questionStates count]; i++) {
         int start = 0;
-        int end = (int)[historyQuestions[i % [historyQuestions count]] count] - 1;
+        int end = (int)[questionStates[i % [questionStates count]] count] - 1;
         if (i == current.section) {
             start = (int)current.row + 1;
         }
-        if (i == current.section + [historyQuestions count]) {
+        if (i == current.section + [questionStates count]) {
             end = (int)current.row;
         }
         for (; start <= end; start++) {
-            NSManagedObject *history_question = historyQuestions[i % [historyQuestions count]][start];
-            BOOL isDo = NO;
-            for (int j = 1; j <= 4; j++) {
-                isDo = isDo | [[history_question valueForKey:[NSString stringWithFormat:@"choose%d", j]] boolValue];
-            }
-            if (!isDo) {
+             if ([questionStates[i % [questionStates count]][start] integerValue]== STEQuestionStateUndo) {
                 //是否翻转；如果翻转则先跳到第一行；如果最开始在第一行，则跳到最后一行
-                if (i == current.section + [historyQuestions count]) {
+                if (i == current.section + [questionStates count]) {
                     if (isToTop) {
-                        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:([[historyQuestions lastObject] count] - 1) inSection:([historyQuestions count] - 1)] atScrollPosition:UITableViewScrollPositionTop animated:NO];
+                        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:([[questionStates lastObject] count] - 1) inSection:([questionStates count] - 1)] atScrollPosition:UITableViewScrollPositionTop animated:NO];
                     } else {
                         [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
                     }
                 }
-                [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:start inSection:(i % [historyQuestions count])] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+                [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:start inSection:(i % [questionStates count])] atScrollPosition:UITableViewScrollPositionTop animated:YES];
                 return;
             }
 
@@ -327,7 +335,7 @@
     }
     if (isToBottom) {
         //current设置为最后一个元素
-        current = [NSIndexPath indexPathForRow:([[historyQuestions lastObject] count] - 1) inSection:([historyQuestions count] - 1)];
+        current = [NSIndexPath indexPathForRow:([[questionStates lastObject] count] - 1) inSection:([questionStates count] - 1)];
     }
     if (isToTop) {
         //current设置为第一个元素
@@ -335,23 +343,21 @@
     }
     
     //遍历整个数组
-    for (int i = (int)current.section; i <= current.section + [historyQuestions count]; i++) {
+    for (int i = (int)current.section; i <= current.section + [questionStates count]; i++) {
         int start = 0;
-        int end = (int)[historyQuestions[i % [historyQuestions count]] count] - 1;
+        int end = (int)[questionStates[i % [questionStates count]] count] - 1;
         if (i == current.section) {
             start = (int)current.row + 1;
         }
-        if (i == current.section + [historyQuestions count]) {
+        if (i == current.section + [questionStates count]) {
             end = (int)current.row;
         }
         for (; start <= end; start++) {
-            NSManagedObject *history_question = historyQuestions[i % [historyQuestions count]][start];
-            BOOL isFault = ![[history_question valueForKey:@"correct"] boolValue];
-            if (isFault) {
+            if ([questionStates[i % [questionStates count]][start] integerValue] == STEQuestionStateFault) {
                 //是否翻转；如果翻转则先跳到第一行；如果最开始在第一行，则跳到最后一行
                 if (i == current.section + [historyQuestions count]) {
                     if (isToTop) {
-                        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:([[historyQuestions lastObject] count] - 1) inSection:([historyQuestions count] - 1)] atScrollPosition:UITableViewScrollPositionTop animated:NO];
+                        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:([[questionStates lastObject] count] - 1) inSection:([questionStates count] - 1)] atScrollPosition:UITableViewScrollPositionTop animated:NO];
                     } else {
                         [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
                     }
@@ -369,22 +375,16 @@
 
 -(void)fontChange:(id)sender{
     MenuItem *item = (MenuItem *)sender;
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    appDelegate.settings[@"font"] = [NSNumber numberWithInteger:item.value];
-    [defaults setObject:[NSNumber numberWithInteger:item.value] forKey:@"font"];
-    [defaults synchronize];
+    STESettings *settings = [STESettings shared];
+    settings.font = item.value;
     [self changeSetting];
     [self.tableView reloadData];
 }
 
 -(void)backgroundChange:(id)sender{
     MenuItem *item = (MenuItem *)sender;
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    appDelegate.settings[@"background"] = [NSNumber numberWithInteger:item.value];
-    [defaults setObject:[NSNumber numberWithInteger:item.value] forKey:@"background"];
-    [defaults synchronize];
+    STESettings *settings = [STESettings shared];
+    settings.background = item.value;
     [self changeSetting];
     [self.tableView reloadData];
 }
@@ -405,16 +405,6 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
-- (void)viewWillDisappear:(BOOL)animated{
-    if (!isSubmit) {
-        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-        if (![history isFault]) {
-            [history setValue:[NSDate date] forKey:@"date"];
-        }
-        [appDelegate saveContext];
-    }
-}
-
 - (void)applicationWillResignActive{
     if (!isSubmit) {
         AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
@@ -426,33 +416,17 @@
 }
 
 - (void)changeSetting{
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
-    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
-    if (background_color == 0) {
-        self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-        self.tableView.sectionIndexBackgroundColor = [UIColor groupTableViewBackgroundColor];
-        if ([self.tableView.tableHeaderView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableHeaderView viewWithTag:99]).textColor = [UIColor darkTextColor];
-        }
-    } else if(background_color == 1){
-        self.tableView.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-        self.tableView.sectionIndexBackgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-        if ([self.tableView.tableHeaderView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableHeaderView viewWithTag:99]).textColor = [UIColor darkTextColor];
-        }
-    } else if(background_color == 2){
-        self.tableView.backgroundColor = [UIColor blackColor];
-        self.tableView.sectionIndexBackgroundColor = [UIColor blackColor];
-        if ([self.tableView.tableHeaderView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableHeaderView viewWithTag:99]).textColor = [UIColor lightTextColor];
-        }
+    STESettings *settings = [STESettings shared];
+    self.tableView.backgroundColor = settings.backgroundColor;
+    if ([self.tableView.tableHeaderView viewWithTag:99]) {
+        ((UILabel *)[self.tableView.tableHeaderView viewWithTag:99]).textColor = settings.textColor;
     }
+    //self.tableView.sectionIndexBackgroundColor = [UIColor groupTableViewBackgroundColor];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+    self.tableView.decelerationRate = UIScrollViewDecelerationRateFast;
 
     //增加响应ResignActive事件
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
@@ -463,54 +437,116 @@
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     
     //索引设置
-    self.tableView.sectionIndexColor = [UIColor grayColor];
-
+    //self.tableView.sectionIndexColor = [UIColor grayColor];
     
-    UIBarButtonItem *nextUndoButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"next_undo_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(nextUndo)];
-    UIBarButtonItem *nextFaultButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"next_wrong_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(nextFault)];
+    STESettings *settings = [STESettings shared];
     
-    MenuItem *submitItem = [[MenuItem alloc] initWithButton:@"交卷" image:[UIImage imageNamed:@"submit_pop"] target:self action:@selector(submit)];
-    MenuItem *showAnswerItem = [[MenuItem alloc] initWithButton:@"显示答案" image:[UIImage imageNamed:@"show_answer_pop"] target:self action:@selector(showAnswer:)];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    MenuItem *fontItem = [[MenuItem alloc] initWithSegment:@"小,中,大" image:[UIImage imageNamed:@"font_pop"] target:self action:@selector(fontChange:) defaultValue:[appDelegate.settings[@"font"] integerValue]];
-    MenuItem *backgroundItem = [[MenuItem alloc] initWithSegment:@"白天,护眼,夜间" image:[UIImage imageNamed:@"scene_pop"] target:self action:@selector(backgroundChange:) defaultValue:[appDelegate.settings[@"background"] integerValue]];
-    
-    UIBarButtonItem *moreButton=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"pop_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(showMenu:)];
-    
-    //加载用户数据
-    isFaultPrefer_setting = [appDelegate.settings[@"isFaultPrefer"] boolValue];
-    isLongPressFavor_setting = [appDelegate.settings[@"isLongPressFavor"] boolValue];
-    BOOL isShowAnswer_setting = [appDelegate.settings[@"isShowAnswer"] boolValue];
-
-    //数据初始化
-    displayIndexes = [NSMutableArray arrayWithArray:@[@"单", @"多", @"判"]];
-    displaySections = [NSMutableArray arrayWithArray:@[@"一、单选题", @"二、多选题", @"三、判断题"]];
-    displayQuestions = [NSMutableArray array];
-    historyQuestions = [NSMutableArray array];
-    for (NSString *index in displaySections) {
-        [displayQuestions addObject:[NSMutableArray array]];
-        [historyQuestions addObject:[NSMutableArray array]];
+    //footer
+    UIView *footer =[[UIView alloc] initWithFrame:CGRectZero];
+    UIActivityIndicatorViewStyle style = UIActivityIndicatorViewStyleGray;
+    if (settings.background == STEBackgroundStyleDark) {
+        style = UIActivityIndicatorViewStyleWhite;
+    }
+    UIActivityIndicatorView *activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:style];
+    activityView.frame = CGRectMake((self.tableView.frame.size.width - 20.0f) / 2, (self.tableView.frame.size.height - self.navigationController.navigationBar.frame.size.height - 20 - 20.0f) / 2 - self.tableView.contentSize.height, 20.0f, 20.0f);
+    [footer addSubview:activityView];
+    self.tableView.tableFooterView = footer;
+    for (UIView *subview in [self.tableView.tableFooterView subviews]) {
+        if ([subview class] == [UIActivityIndicatorView class]) {
+            [(UIActivityIndicatorView *)subview startAnimating];
+        }
     }
     
-    NSManagedObjectContext *context = [appDelegate managedObjectContext];
-    NSError *error;
-    
-    //历史记录
-    if (isHistory) {
-        NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kHistoryQuestion];
-        NSPredicate *pred = [NSPredicate predicateWithFormat:@"(history_id = %@)", [history valueForKey:@"id"]];
-        [request setPredicate:pred];
-        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"question_number" ascending:YES];
-        NSArray * sortDescriptors = [NSArray arrayWithObject: sort];
-        [request setSortDescriptors:sortDescriptors];
-        NSArray *history_questions = [context executeFetchRequest:request error:&error];
-        //仅显示错题
-        if (isShowFault && isSubmit) {
-            popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
-            [self.navigationItem setRightBarButtonItems:@[moreButton]];
-            for (NSManagedObject *history_question in history_questions) {
-                //答题错误
-                if (![[history_question valueForKey:@"correct"] boolValue]) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [NSThread sleepForTimeInterval:0.5];
+        UIBarButtonItem *nextUndoButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"next_undo_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(nextUndo)];
+        UIBarButtonItem *nextFaultButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"next_wrong_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(nextFault)];
+        
+        MenuItem *submitItem = [[MenuItem alloc] initWithButton:@"交卷" image:[UIImage imageNamed:@"submit_pop"] target:self action:@selector(submit)];
+        MenuItem *showAnswerItem = [[MenuItem alloc] initWithButton:@"显示答案" image:[UIImage imageNamed:@"show_answer_pop"] target:self action:@selector(showAnswer:)];
+        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        
+        STESettings *settings = [STESettings shared];
+        MenuItem *fontItem = [[MenuItem alloc] initWithSegment:@"小,中,大" image:[UIImage imageNamed:@"font_pop"] target:self action:@selector(fontChange:) defaultValue:settings.font];
+        MenuItem *backgroundItem = [[MenuItem alloc] initWithSegment:@"白天,护眼,夜间" image:[UIImage imageNamed:@"scene_pop"] target:self action:@selector(backgroundChange:) defaultValue:settings.background];
+        
+        UIBarButtonItem *moreButton=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"pop_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(showMenu:)];
+        
+        //加载用户数据
+        isFaultPrefer_setting = settings.isFaultPrefer;
+        isLongPressFavor_setting = settings.isLongPressFavor;
+        BOOL isShowAnswer_setting = settings.isShowAnswer;
+        
+        //数据初始化
+        //displayIndexes = [NSMutableArray arrayWithArray:@[@"单", @"多", @"判"]];
+        displaySections = [NSMutableArray arrayWithArray:@[@"一、单选题", @"二、多选题", @"三、判断题"]];
+        displayQuestions = [NSMutableArray array];
+        historyQuestions = [NSMutableArray array];
+        questionStates = [NSMutableArray array];
+        questionNumbers = [NSMutableArray array];
+        for (NSString *index in displaySections) {
+            [displayQuestions addObject:[NSMutableArray array]];
+            [historyQuestions addObject:[NSMutableArray array]];
+            [questionStates addObject:[NSMutableArray array]];
+            [questionNumbers addObject:[NSMutableArray array]];
+        }
+        
+        NSManagedObjectContext *context = [appDelegate managedObjectContext];
+        NSError *error;
+        
+        //历史记录
+        if (isHistory) {
+            NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kHistoryQuestion];
+            NSPredicate *pred = [NSPredicate predicateWithFormat:@"(history_id = %@)", [history valueForKey:@"id"]];
+            [request setPredicate:pred];
+            NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"question_number" ascending:YES];
+            NSArray *sortDescriptors = [NSArray arrayWithObject:sort];
+            [request setSortDescriptors:sortDescriptors];
+            NSArray *history_questions = [context executeFetchRequest:request error:&error];
+            //仅显示错题
+            if (isShowFault && isSubmit) {
+                dispatch_async(dispatch_get_main_queue(),^{
+                    popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
+                    [self.navigationItem setRightBarButtonItems:@[moreButton]];
+                });
+                
+                for (NSManagedObject *history_question in history_questions) {
+                    //答题错误
+                    if (![[history_question valueForKey:@"correct"] boolValue]) {
+                        NSFetchRequest *request1 = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
+                        NSPredicate *pred1 = [NSPredicate predicateWithFormat:@"(id = %@)", [history_question valueForKey:@"question_id"]];
+                        [request1 setPredicate:pred1];
+                        NSArray *questions = [context executeFetchRequest:request1 error:&error];
+                        if ([questions count] > 0) {
+                            NSManagedObject *question = questions[0];
+                            [displayQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
+                            [historyQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:history_question];
+                            [questionNumbers[[[question valueForKey:@"type"] integerValue] - 1] addObject:[history_question valueForKey:@"question_number"]];
+                            [questionStates[[[question valueForKey:@"type"] integerValue] - 1] addObject:[NSNumber numberWithInteger:STEQuestionStateFault]];
+                        }
+                    }
+                }
+            } else {
+                if (isSubmit) {
+                    dispatch_async(dispatch_get_main_queue(),^{
+                        popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
+                        [self.navigationItem setRightBarButtonItems:@[moreButton, nextFaultButton]];
+                    });
+                    
+                } else {
+                    if (isExam) {
+                        dispatch_async(dispatch_get_main_queue(),^{
+                            popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, fontItem, backgroundItem]];
+                            [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
+                        });
+                    } else {
+                        dispatch_async(dispatch_get_main_queue(),^{
+                            popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, showAnswerItem, fontItem, backgroundItem]];
+                            [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
+                        });
+                    }
+                }
+                for (NSManagedObject *history_question in history_questions) {
                     NSFetchRequest *request1 = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
                     NSPredicate *pred1 = [NSPredicate predicateWithFormat:@"(id = %@)", [history_question valueForKey:@"question_id"]];
                     [request1 setPredicate:pred1];
@@ -519,155 +555,179 @@
                         NSManagedObject *question = questions[0];
                         [displayQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
                         [historyQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:history_question];
+                        [questionNumbers[[[question valueForKey:@"type"] integerValue] - 1] addObject:[history_question valueForKey:@"question_number"]];
+                        if (isSubmit) {
+                            if (![[history_question valueForKey:@"correct"] boolValue]){
+                                [questionStates[[[question valueForKey:@"type"] integerValue] - 1] addObject:[NSNumber numberWithInteger:STEQuestionStateFault]];
+                            } else {
+                                [questionStates[[[question valueForKey:@"type"] integerValue] - 1] addObject:[NSNumber numberWithInteger:STEQuestionStateRight]];
+                            }
+                        } else {
+                            BOOL isDo = NO;
+                            for (int j = 1; j <= 4; j++) {
+                                isDo = isDo | [[history_question valueForKey:[NSString stringWithFormat:@"choose%d", j]] boolValue];
+                            }
+                            if (isDo) {
+                                [questionStates[[[question valueForKey:@"type"] integerValue] - 1] addObject:[NSNumber numberWithInteger:STEQuestionStateDone]];
+                            } else {
+                                [questionStates[[[question valueForKey:@"type"] integerValue] - 1] addObject:[NSNumber numberWithInteger:STEQuestionStateUndo]];
+                            }
+                        }
                     }
                 }
             }
-        } else {
-            if (isSubmit) {
-                popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
-                [self.navigationItem setRightBarButtonItems:@[moreButton, nextFaultButton]];
-            } else {
-                if (isExam) {
+        }
+        //非历史记录
+        else {
+            //刷题
+            if (!isExam) {
+                //默认显示答案
+                if (isShowAnswer_setting) {
+                    dispatch_async(dispatch_get_main_queue(),^{
+                        popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
+                        [self.navigationItem setRightBarButtonItems:@[moreButton]];
+                    });
+                } else {
+                    dispatch_async(dispatch_get_main_queue(),^{
+                        popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, showAnswerItem, fontItem, backgroundItem]];
+                        [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
+                    });
+                    
+                }
+                NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
+                NSPredicate *pred = [NSPredicate predicateWithFormat:@"(section_id = %@)", [sections[0] valueForKey:@"id"]];
+                [request setPredicate:pred];
+                NSMutableArray *questions = [[context executeFetchRequest:request error:&error] mutableCopy];
+                [self shuffle:questions];
+                for (NSManagedObject *question in questions) {
+                    [displayQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
+                }
+            }
+            //智能出题
+            else {
+                dispatch_async(dispatch_get_main_queue(),^{
                     popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, fontItem, backgroundItem]];
                     [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
-                } else {
-                    popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, showAnswerItem, fontItem, backgroundItem]];
-                    [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
+                });
+                NSMutableArray *tempQuestions = [NSMutableArray array];
+                for (NSString *index in displaySections) {
+                    [tempQuestions addObject:[NSMutableArray array]];
                 }
-            }
-            for (NSManagedObject *history_question in history_questions) {
-                NSFetchRequest *request1 = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
-                NSPredicate *pred1 = [NSPredicate predicateWithFormat:@"(id = %@)", [history_question valueForKey:@"question_id"]];
-                [request1 setPredicate:pred1];
-                NSArray *questions = [context executeFetchRequest:request1 error:&error];
-                if ([questions count] > 0) {
-                    NSManagedObject *question = questions[0];
-                    [displayQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
-                    [historyQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:history_question];
-                }
-            }
-        }
-    }
-    //非历史记录
-    else {
-        //刷题
-        if (!isExam) {
-            //默认显示答案
-            if (isShowAnswer_setting) {
-                popMenu = [[PopupMenu alloc] initWithItems:@[fontItem, backgroundItem]];
-                [self.navigationItem setRightBarButtonItems:@[moreButton]];
-            } else {
-                popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, showAnswerItem, fontItem, backgroundItem]];
-                [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
-            }
-            NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
-            NSPredicate *pred = [NSPredicate predicateWithFormat:@"(section_id = %@)", [sections[0] valueForKey:@"id"]];
-            [request setPredicate:pred];
-            NSMutableArray *questions = [[context executeFetchRequest:request error:&error] mutableCopy];
-            [self shuffle:questions];
-            for (NSManagedObject *question in questions) {
-                [displayQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
-            }
-        }
-        //智能出题
-        else {
-            popMenu = [[PopupMenu alloc] initWithItems:@[submitItem, fontItem, backgroundItem]];
-            [self.navigationItem setRightBarButtonItems:@[moreButton, nextUndoButton]];
-            NSMutableArray *tempQuestions = [NSMutableArray array];
-            for (NSString *index in displaySections) {
-                [tempQuestions addObject:[NSMutableArray array]];
-            }
-            for (NSManagedObject *section in sections) {
-                NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
-                NSPredicate *pred = [NSPredicate predicateWithFormat:@"(section_id = %@)", [section valueForKey:@"id"]];
-                [request setPredicate:pred];
-                NSArray *questions = [context executeFetchRequest:request error:&error];
-                if (questions != nil) {
-                    for (NSManagedObject *question in questions) {
-                        [tempQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
+                for (NSManagedObject *section in sections) {
+                    NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kQuestion];
+                    NSPredicate *pred = [NSPredicate predicateWithFormat:@"(section_id = %@)", [section valueForKey:@"id"]];
+                    [request setPredicate:pred];
+                    NSArray *questions = [context executeFetchRequest:request error:&error];
+                    if (questions != nil) {
+                        for (NSManagedObject *question in questions) {
+                            [tempQuestions[[[question valueForKey:@"type"] integerValue] - 1] addObject:question];
+                        }
                     }
                 }
-            }
-            int i = 0;
-            for (NSString *index in displaySections) {
-                displayQuestions[i] = [self generateQuestion:tempQuestions[i] withQuestionNum:60 andFaultPrefer:isFaultPrefer_setting];
-                i++;
-            }
-        }
-        //默不显示答案
-        if (!isExam && isShowAnswer_setting) {
-            isShowAnswer = YES;
-        } else {
-            //初始化历史
-            int history_id = (int) [[NSDate date] timeIntervalSince1970];
-            NSFetchRequest *history_request = [[NSFetchRequest alloc] initWithEntityName:kHistory];
-            NSPredicate *history_pred = [NSPredicate predicateWithFormat:@"(id = %d)", history_id];
-            [history_request setPredicate:history_pred];
-            NSArray *histories = [context executeFetchRequest:history_request error:&error];
-            if ([histories count] > 0) {
-                history = histories[0];
-            } else {
-                history = [NSEntityDescription insertNewObjectForEntityForName:kHistory inManagedObjectContext:context];
-            }
-            [history setValue:[NSNumber numberWithInt:history_id] forKey:@"id"];
-            [history setValue:[NSDate date] forKey:@"date"];
-            [history setValue:[NSNumber numberWithBool:isExam] forKey:@"isExam"];
-            if (!isExam) {
-                [history setValue:[sections[0] valueForKey:@"name"] forKey:@"section_name"];
-            }
-            [history setValue:[NSNumber numberWithBool:NO] forKey:@"isSubmit"];
-            
-            //初始化历史详细记录
-            NSFetchRequest *history_question_request = [[NSFetchRequest alloc] initWithEntityName:kHistoryQuestion];
-            NSPredicate *history_question_pred = [NSPredicate predicateWithFormat:@"(history_id = %d)", history_id];
-            [history_question_request setPredicate:history_question_pred];
-            NSArray *history_questiones = [context executeFetchRequest:history_question_request error:&error];
-            for (NSManagedObject *history_question in history_questiones) {
-                [context deleteObject:history_question];
-            }
-            int question_index = 0;
-            int section_index = 0;
-            for (NSArray *question_section in displayQuestions) {
-                for (NSManagedObject *question in question_section) {
-                    NSManagedObject *history_question = [NSEntityDescription insertNewObjectForEntityForName:kHistoryQuestion inManagedObjectContext:context];
-                    [history_question setValue:[NSNumber numberWithInt:history_id] forKey:@"history_id"];
-                    [history_question setValue:[question valueForKey:@"id"] forKey:@"question_id"];
-                    [history_question setValue:[NSNumber numberWithInt:(history_id * 1000 + question_index)] forKey:@"id"];
-                    [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose1"];
-                    [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose2"];
-                    [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose3"];
-                    [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose4"];
-                    [history_question setValue:[NSNumber numberWithInt:(question_index + 1)] forKey:@"question_number"];
-                    [historyQuestions[section_index] addObject:history_question];
-                    question_index++;
+                int i = 0;
+                for (NSString *index in displaySections) {
+                    displayQuestions[i] = [self generateQuestion:tempQuestions[i] withQuestionNum:60 andFaultPrefer:isFaultPrefer_setting];
+                    i++;
                 }
-                section_index++;
+            }
+            //默不显示答案
+            if (!isExam && isShowAnswer_setting) {
+                isShowAnswer = YES;
+                int question_index = 0;
+                int section_index = 0;
+                for (NSArray *question_section in displayQuestions) {
+                    for (NSManagedObject *question in question_section) {
+                        [questionNumbers[section_index] addObject:[NSNumber numberWithInt:(question_index + 1)]];
+                        [questionStates[section_index] addObject:[NSNumber numberWithInteger:STEQuestionStateUndo]];
+                        question_index++;
+                    }
+                    section_index++;
+                }
+            } else {
+                //初始化历史
+                int history_id = (int) [[NSDate date] timeIntervalSince1970];
+                NSFetchRequest *history_request = [[NSFetchRequest alloc] initWithEntityName:kHistory];
+                NSPredicate *history_pred = [NSPredicate predicateWithFormat:@"(id = %d)", history_id];
+                [history_request setPredicate:history_pred];
+                NSArray *histories = [context executeFetchRequest:history_request error:&error];
+                if ([histories count] > 0) {
+                    history = histories[0];
+                } else {
+                    history = [NSEntityDescription insertNewObjectForEntityForName:kHistory inManagedObjectContext:context];
+                }
+                [history setValue:[NSNumber numberWithInt:history_id] forKey:@"id"];
+                [history setValue:[NSDate date] forKey:@"date"];
+                [history setValue:[NSNumber numberWithBool:isExam] forKey:@"isExam"];
+                if (!isExam) {
+                    [history setValue:[sections[0] valueForKey:@"name"] forKey:@"section_name"];
+                }
+                [history setValue:[NSNumber numberWithBool:NO] forKey:@"isSubmit"];
+                
+                //初始化历史详细记录
+                NSFetchRequest *history_question_request = [[NSFetchRequest alloc] initWithEntityName:kHistoryQuestion];
+                NSPredicate *history_question_pred = [NSPredicate predicateWithFormat:@"(history_id = %d)", history_id];
+                [history_question_request setPredicate:history_question_pred];
+                NSArray *history_questiones = [context executeFetchRequest:history_question_request error:&error];
+                for (NSManagedObject *history_question in history_questiones) {
+                    [context deleteObject:history_question];
+                }
+                int question_index = 0;
+                int section_index = 0;
+                for (NSArray *question_section in displayQuestions) {
+                    for (NSManagedObject *question in question_section) {
+                        NSManagedObject *history_question = [NSEntityDescription insertNewObjectForEntityForName:kHistoryQuestion inManagedObjectContext:context];
+                        [history_question setValue:[NSNumber numberWithInt:history_id] forKey:@"history_id"];
+                        [history_question setValue:[question valueForKey:@"id"] forKey:@"question_id"];
+                        [history_question setValue:[NSNumber numberWithInt:(history_id * 1000 + question_index)] forKey:@"id"];
+                        [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose1"];
+                        [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose2"];
+                        [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose3"];
+                        [history_question setValue:[NSNumber numberWithBool:NO] forKey:@"choose4"];
+                        [history_question setValue:[NSNumber numberWithInt:(question_index + 1)] forKey:@"question_number"];
+                        [historyQuestions[section_index] addObject:history_question];
+                        [questionNumbers[section_index] addObject:[NSNumber numberWithInt:(question_index + 1)]];
+                        [questionStates[section_index] addObject:[NSNumber numberWithInteger:STEQuestionStateUndo]];
+                        question_index++;
+                    }
+                    section_index++;
+                }
             }
         }
-    }
-    
-    //表头
-    if (!isExam) {
-        CGRect frameRect = CGRectMake(0, 0, self.tableView.frame.size.width - 20, 30);
-        UIView *header = [[UIView alloc] initWithFrame:frameRect];
-        CGRect label_rect = CGRectMake(0, 0, self.tableView.frame.size.width, 20);
-        UILabel *label = [[UILabel alloc] initWithFrame:label_rect];
-        label.tag = 99;
-        label.font = [UIFont systemFontOfSize:13];
-        label.textAlignment = NSTextAlignmentCenter;
-        if (isHistory) {
-            label.text= [history valueForKey:@"section_name"];
-        } else{
-            label.text= [sections[0] valueForKey:@"name"];
-        }
-        [header addSubview:label];
-        self.tableView.tableHeaderView = header;
-    }
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSIndexSet *indexSet=[[NSIndexSet alloc]initWithIndex:0];
-        [self.tableView reloadSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            for (UIView *subview in [self.tableView.tableFooterView subviews]) {
+                if ([subview class] == [UIActivityIndicatorView class]) {
+                    [(UIActivityIndicatorView *)subview stopAnimating];
+                }
+            }
+            //表头
+            if (!isExam) {
+                CGRect frameRect = CGRectMake(0, 0, self.tableView.frame.size.width - 20, 30);
+                UIView *header = [[UIView alloc] initWithFrame:frameRect];
+                CGRect label_rect = CGRectMake(0, 0, self.tableView.frame.size.width, 20);
+                UILabel *label = [[UILabel alloc] initWithFrame:label_rect];
+                label.tag = 99;
+                label.font = [UIFont systemFontOfSize:13];
+                label.textAlignment = NSTextAlignmentCenter;
+                if (isHistory) {
+                    label.text= [history valueForKey:@"section_name"];
+                } else{
+                    label.text= [sections[0] valueForKey:@"name"];
+                }
+                [header addSubview:label];
+                self.tableView.tableHeaderView = header;
+            }
+            [self.tableView reloadData];
+            dispatch_async(dispatch_get_main_queue(),^{
+                NSIndexSet *indexSet=[[NSIndexSet alloc]initWithIndex:0];
+                [self.tableView reloadSections:indexSet withRowAnimation:UITableViewRowAnimationNone];
+            });
+            CGRect frame = (CGRect) {self.tableView.frame.size.width, self.navigationController.navigationBar.frame.size.height + 20 + 80, 0, self.tableView.frame.size.height - self.navigationController.navigationBar.frame.size.height - 20 - 80 * 2};
+            self.asView = [[AnswerSheetView alloc] initWithQuestions:questionNumbers sections:displaySections states:questionStates frame:frame target:self performSelector:@selector(stepToQuestion:)];
+            [self.navigationController.view addSubview:asView];
+        });
     });
-    //[self changeSetting];
+    
+    
     
     
     // Uncomment the following line to preserve selection between presentations.
@@ -678,13 +738,56 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    //NSLog(@"viewWillAppear");
     [self changeSetting];
-    [self.tableView reloadData];
+//    [self.tableView reloadData];
 }
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    //NSLog(@"viewWillDisappear");
+    asView.hidden = YES;
+    [popMenu dismissMenu];
+}
+
+- (void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    //NSLog(@"viewDidAppear");
+    asView.hidden = NO;
+}
+
+- (void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    //NSLog(@"viewDidDisappear");
+    if (!isSubmit) {
+        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        if (![history isFault]) {
+            [history setValue:[NSDate date] forKey:@"date"];
+        }
+        [appDelegate saveContext];
+    }
+    [asView dismissView];
+    asView = nil;
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)stepToQuestion:(NSNumber *)location
+{
+    long location_i = [location integerValue];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:(location_i / 100) inSection:(location_i % 100)];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, 500ull * NSEC_PER_MSEC);
+        dispatch_after(time, dispatch_get_main_queue(), ^{
+            [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:(location_i / 100) inSection:(location_i % 100)] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+        });
+    });
 }
 
 - (void)cellLongPress:(UIGestureRecognizer *)recognizer
@@ -762,7 +865,7 @@
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
     NSManagedObject *object = self.displayQuestions[indexPath.section][indexPath.row];
     NSManagedObject *history_object = self.historyQuestions[indexPath.section][indexPath.row];
-    NSString *chooseId = [NSString stringWithFormat:@"choose%ld", choice.tag];
+    NSString *chooseId = [NSString stringWithFormat:@"choose%ld", (long)choice.tag];
     //多选
     if ([[object valueForKey:@"type"] integerValue] == 2) {
         [history_object setValue:[NSNumber numberWithBool: ![[history_object valueForKey:chooseId] boolValue]] forKey:chooseId];
@@ -781,6 +884,17 @@
             [history_object setValue:[NSNumber numberWithBool: YES] forKey:chooseId];
         }
     }
+    BOOL isDo = NO;
+    for (int j = 1; j <= 4; j++) {
+        isDo = isDo | [[history_object valueForKey:[NSString stringWithFormat:@"choose%d", j]] boolValue];
+    }
+    if (isDo) {
+        [self.questionStates[indexPath.section] replaceObjectAtIndex:indexPath.row withObject:[NSNumber numberWithInteger:STEQuestionStateDone]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:nQuestionState object:nil userInfo:@{@"state": [NSNumber numberWithInteger:STEQuestionStateDone], @"indexPath": indexPath}];
+    } else {
+        [self.questionStates[indexPath.section] replaceObjectAtIndex:indexPath.row withObject:[NSNumber numberWithInteger:STEQuestionStateUndo]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:nQuestionState object:nil userInfo:@{@"state": [NSNumber numberWithInteger:STEQuestionStateUndo], @"indexPath": indexPath}];
+    }
     [self.tableView reloadData];
     //[self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
@@ -788,7 +902,7 @@
 #pragma mark -Scroll view delegate
 //判断动画是否结束
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
-
+    
 }
 
 //判断是否滑动到顶部或底部
@@ -848,7 +962,14 @@
             NSString *choiceId = [NSString stringWithFormat:@"choice%d", i];
             UILabel *choice = (UILabel *)[cell viewWithTag:i];
             if ([object valueForKey:choiceId]) {
-                choice.text = [NSString stringWithFormat:@"%@. %@", choice_head[i - 1], [object valueForKey:choiceId]];
+                NSString *correct_sign = @"✓";
+                if (![(NSString *)[object valueForKey:@"answer"] containsString:choice_head[i - 1]]) {
+                    correct_sign = @"　";
+                }
+                NSMutableAttributedString *choice_str = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@%@. %@", correct_sign, choice_head[i - 1], [object valueForKey:choiceId]]];
+                [choice_str addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
+                choice.attributedText = choice_str;
+                
                 for (UIGestureRecognizer *gestureRecognizer in [choice gestureRecognizers]) {
                     [choice removeGestureRecognizer:gestureRecognizer];
                 }
@@ -858,15 +979,11 @@
                     [choice removeGestureRecognizer:gestureRecognizer];
                 }
             }
-            if ([(NSString *)[object valueForKey:@"answer"] containsString:choice_head[i - 1]]) {
-                choice.textColor = [UIColor blueColor];
-            } else {
-                choice.textColor = cell.defaultTextColor;
-            }
+            
         }
         cell.analysis.text = ([object valueForKey:@"analysis"]) ? [NSString stringWithFormat:@"【答案】%@\n【解析】%@", [object valueForKey:@"answer"], [object valueForKey:@"analysis"]] : [NSString stringWithFormat:@"【答案】%@", [object valueForKey:@"answer"]];
     } else if(isSubmit) {
-        cell.content.text = [NSString stringWithFormat:@"%ld. %@", [[history_question valueForKey:@"question_number"] integerValue], [object valueForKey:@"content"]];
+        cell.content.text = [NSString stringWithFormat:@"%ld. %@", (long)[[history_question valueForKey:@"question_number"] integerValue], [object valueForKey:@"content"]];
         
         for (int i = 1; i <= 4; i++) {
             NSString *choiceId = [NSString stringWithFormat:@"choice%d", i];
@@ -909,7 +1026,7 @@
         }
         cell.analysis.text = ([object valueForKey:@"analysis"]) ? [NSString stringWithFormat:@"【答案】%@\n【解析】%@", [object valueForKey:@"answer"], [object valueForKey:@"analysis"]] : [NSString stringWithFormat:@"【答案】%@", [object valueForKey:@"answer"]];
     } else {
-        cell.content.text = [NSString stringWithFormat:@"%ld. %@", [[history_question valueForKey:@"question_number"] integerValue], [object valueForKey:@"content"]];
+        cell.content.text = [NSString stringWithFormat:@"%ld. %@", (long)[[history_question valueForKey:@"question_number"] integerValue], [object valueForKey:@"content"]];
         
         for (int i = 1; i <= 4; i++) {
             UITapGestureRecognizer *labelTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(labelTap:)];
@@ -965,9 +1082,9 @@
     return 20;
 }
 
-- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView{
-    return displayIndexes;
-}
+//- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView{
+//    return displayIndexes;
+//}
 
 /*
 // Override to support conditional editing of the table view.

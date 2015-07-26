@@ -19,47 +19,46 @@
 @implementation HistoryTableViewController
 @synthesize displayHistorys;
 - (void)refreshData{
-    [displayHistorys removeAllObjects];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    NSManagedObjectContext *context = [appDelegate managedObjectContext];
-    NSError *error;
-    NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kHistory];
-    NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
-    NSArray * sortDescriptors = [NSArray arrayWithObject: sort];
-    [request setSortDescriptors:sortDescriptors];
-    NSArray *histories = [context executeFetchRequest:request error:&error];
-    for (NSManagedObject *history in histories) {
-        [displayHistorys addObject:history];
+    for (UIView *subview in [self.tableView.tableFooterView subviews]) {
+        if ([subview class] == [UIActivityIndicatorView class]) {
+            [(UIActivityIndicatorView *)subview startAnimating];
+        }
     }
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [displayHistorys removeAllObjects];
+        AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
+        NSManagedObjectContext *context = [appDelegate managedObjectContext];
+        NSError *error;
+        NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:kHistory];
+        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"date" ascending:NO];
+        NSArray * sortDescriptors = [NSArray arrayWithObject: sort];
+        [request setSortDescriptors:sortDescriptors];
+        NSArray *histories = [context executeFetchRequest:request error:&error];
+        for (NSManagedObject *history in histories) {
+            [displayHistorys addObject:history];
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            for (UIView *subview in [self.tableView.tableFooterView subviews]) {
+                if ([subview class] == [UIActivityIndicatorView class]) {
+                    [(UIActivityIndicatorView *)subview stopAnimating];
+                }
+            }
+            if ([displayHistorys count] == 0) {
+                ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"暂无历史记录！";
+            } else {
+                ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"";
+            }
+            [self.tableView reloadData];
+        });
+    });
     
-    if ([displayHistorys count] == 0) {
-        ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"暂无历史记录！";
-    } else {
-        ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).text = @"";
-    }
-    
-    [self changeSetting];
 }
 
 - (void)changeSetting{
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
-    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
-    if (background_color == 0) {
-        self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-        if ([self.tableView.tableFooterView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor darkTextColor];
-        }
-    } else if(background_color == 1){
-        self.tableView.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-        if ([self.tableView.tableFooterView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor darkTextColor];
-        }
-    } else if(background_color == 2){
-        self.tableView.backgroundColor = [UIColor blackColor];
-        if ([self.tableView.tableFooterView viewWithTag:99]) {
-            ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = [UIColor lightTextColor];
-        }
+    STESettings *settings = [STESettings shared];
+    self.tableView.backgroundColor = settings.backgroundColor;
+    if ([self.tableView.tableFooterView viewWithTag:99]) {
+        ((UILabel *)[self.tableView.tableFooterView viewWithTag:99]).textColor = settings.textColor;
     }
 }
 
@@ -76,28 +75,39 @@
     }
     [appDelegate saveContext];
     [self refreshData];
-    [self.tableView reloadData];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    STESettings *settings = [STESettings shared];
+    self.navigationController.navigationBar.barStyle = settings.navigationBarStyle;
+    self.navigationController.navigationBar.tintColor = settings.navigationBarTintColor;
+    
     UIBarButtonItem *clearAllButton =[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"trash_navi"] style:UIBarButtonItemStyleDone target:self action: @selector(clearAll)];
     [self.navigationItem setRightBarButtonItems:@[clearAllButton]];
     
+    //footer
     UIView *footer =[[UIView alloc] initWithFrame:CGRectZero];
-    
     float width = 300;
     float height = 40;
-    CGRect theRect = CGRectMake((self.tableView.frame.size.width - width) / 2, (self.tableView.frame.size.height- self.navigationController.navigationBar.frame.size.height - 20 - self.tabBarController.tabBar.frame.size.height - height) / 2, width, height);
+    CGRect theRect = CGRectMake((self.tableView.frame.size.width - width) / 2, (self.tableView.frame.size.height- self.navigationController.navigationBar.frame.size.height - 20 - height) / 2, width, height);
     UILabel *test = [[UILabel alloc] initWithFrame:theRect];
     test.font = [UIFont systemFontOfSize:30];
     test.textAlignment = NSTextAlignmentCenter;
     test.tag = 99;
     [footer addSubview:test];
-    self.tableView.tableFooterView = footer;
     
+    UIActivityIndicatorViewStyle style = UIActivityIndicatorViewStyleGray;
+    if (settings.background == STEBackgroundStyleDark) {
+        style = UIActivityIndicatorViewStyleWhite;
+    }
+    UIActivityIndicatorView *activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:style];
+    activityView.frame = CGRectMake((self.tableView.frame.size.width - 20.0f) / 2, (self.tableView.frame.size.height - self.navigationController.navigationBar.frame.size.height - 20 - 20.0f) / 2, 20.0f, 20.0f);
+    [footer addSubview:activityView];
+    
+    self.tableView.tableFooterView = footer;
+
     displayHistorys = [NSMutableArray array];
-    //[self refreshData];
     
     
     // Uncomment the following line to preserve selection between presentations.
@@ -108,8 +118,25 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    //NSLog(@"HistoryviewWillAppear");
+    [self changeSetting];
     [self refreshData];
-    [self.tableView reloadData];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    //NSLog(@"HistoryviewWillDisappear");
+}
+
+- (void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+    //NSLog(@"HistoryviewDidAppear");
+}
+
+- (void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    //NSLog(@"HistoryviewDidDisappear");
 }
 
 - (void)didReceiveMemoryWarning {
@@ -171,19 +198,9 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"history_cell" forIndexPath:indexPath];
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
-    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
-    if (background_color == 0) {
-        cell.backgroundColor = [UIColor whiteColor];
-        cell.textLabel.textColor = [UIColor darkTextColor];
-    } else if(background_color == 1){
-        cell.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-        cell.textLabel.textColor = [UIColor darkTextColor];
-    } else if(background_color == 2){
-        cell.backgroundColor = [UIColor blackColor];
-        cell.textLabel.textColor = [UIColor lightTextColor];
-    }    
+    STESettings *settings = [STESettings shared];
+    cell.backgroundColor = settings.backgroundColor;
+    cell.textLabel.textColor = settings.textColor;
     
     NSManagedObject *history = displayHistorys[indexPath.row];
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];

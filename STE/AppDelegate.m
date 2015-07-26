@@ -16,19 +16,14 @@
 @end
 
 @implementation AppDelegate
+@synthesize chaptersAndSections;
 @synthesize settings;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [NSThread sleepForTimeInterval:1];
-    settings = [NSMutableDictionary dictionary];
-    settings[@"font"] = @1;
-    settings[@"background"] = @0;
-    settings[@"isShowAnswer"] = [NSNumber numberWithBool:NO];
-    settings[@"isLongPressFavor"] = [NSNumber numberWithBool:YES];
-    settings[@"isFaultPrefer"] = [NSNumber numberWithBool:YES];
-    
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    if (![defaults objectForKey:@"isFirstStart"] || [[defaults objectForKey:@"isFirstStart"] boolValue]) {
+    settings = [STESettings shared];
+
+    if (settings.isFirstStart) {
         //初始化数据库
         [self deleteAndRecreateStore];
         NSBundle *bundle = [NSBundle mainBundle];
@@ -70,34 +65,9 @@
             chapter_id++;
         }
         [self saveContext];
-        [defaults setObject:[NSNumber numberWithBool:NO] forKey:@"isFirstStart"];
+        settings.isFirstStart = NO;
     }
-    if (![defaults objectForKey:@"isShowAnswer"]) {
-        [defaults setObject:settings[@"isShowAnswer"] forKey:@"isShowAnswer"];
-    } else {
-        settings[@"isShowAnswer"] = [defaults objectForKey:@"isShowAnswer"];
-    }
-    if (![defaults objectForKey:@"isLongPressFavor"]) {
-        [defaults setObject:settings[@"isLongPressFavor"] forKey:@"isLongPressFavor"];
-    } else {
-        settings[@"isLongPressFavor"] = [defaults objectForKey:@"isLongPressFavor"];
-    }
-    if (![defaults objectForKey:@"isFaultPrefer"]) {
-        [defaults setObject:settings[@"isFaultPrefer"] forKey:@"isFaultPrefer"];
-    } else {
-        settings[@"isFaultPrefer"] = [defaults objectForKey:@"isFaultPrefer"];
-    }
-    if (![defaults objectForKey:@"font"]) {
-        [defaults setObject:settings[@"font"] forKey:@"font"];
-    } else {
-        settings[@"font"] = [defaults objectForKey:@"font"];
-    }
-    if (![defaults objectForKey:@"background"]) {
-        [defaults setObject:settings[@"background"] forKey:@"background"];
-    } else {
-        settings[@"background"] = [defaults objectForKey:@"background"];
-    }
-    [defaults synchronize];
+    chaptersAndSections = [ChaptersAndSections shared];
     
     NSLog(@"%@", NSHomeDirectory());
     extern CFAbsoluteTime StartTime;

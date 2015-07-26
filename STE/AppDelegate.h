@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreData/CoreData.h>
+#import "STESettings.h"
+#import "ChaptersAndSections.h"
 
 static NSString * const kChapter = @"Chapter";
 static NSString * const kSection = @"Section";
@@ -16,11 +18,13 @@ static NSString * const kHistory = @"History";
 static NSString * const kHistoryQuestion = @"History_Question";
 
 
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
-@property (strong, nonatomic) NSMutableDictionary *settings;
+@property (strong, nonatomic) STESettings *settings;
+@property (strong, nonatomic) ChaptersAndSections *chaptersAndSections;
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;

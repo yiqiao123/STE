@@ -10,7 +10,16 @@
 #import "AppDelegate.h"
 #import "QuestionTableViewCell.h"
 #import "ChaptersAndSections.h"
+#import "AnswerSheetView.h"
 
+typedef NS_ENUM(NSInteger, STEQuestionState) {
+    STEQuestionStateUndo,
+    STEQuestionStateDone,
+    STEQuestionStateFault,
+    STEQuestionStateRight
+};
+
+static NSString * const nQuestionState = @"QuestionState";
 
 @interface QuestionTableViewController : UITableViewController<UIAlertViewDelegate>
 

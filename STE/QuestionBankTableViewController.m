@@ -18,22 +18,15 @@
 @implementation QuestionBankTableViewController
 
 - (void)changeSetting{
-    AppDelegate *appDelegate = [UIApplication sharedApplication].delegate;
-    //int font_size = (int)[appDelegate.settings[@"font"] integerValue];
-    int background_color = (int)[appDelegate.settings[@"background"] integerValue];
-    if (background_color == 0) {
-        self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
-    } else if(background_color == 1){
-        self.tableView.backgroundColor = [UIColor colorWithRed:0.777 green:0.925 blue:0.8 alpha:1.0];
-    } else if(background_color == 2){
-        self.tableView.backgroundColor = [UIColor blackColor];
-    }
+    STESettings *settings = [STESettings shared];
+    self.tableView.backgroundColor = settings.backgroundColor;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-    self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
+    STESettings *settings = [STESettings shared];
+    self.navigationController.navigationBar.barStyle = settings.navigationBarStyle;
+    self.navigationController.navigationBar.tintColor = settings.navigationBarTintColor;
 
     //self.navigationController.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor whiteColor]};
     //self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:0.2f green:0.2f blue:0.2f alpha:1.0];
@@ -80,6 +73,7 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
     [self changeSetting];
     [self.tableView reloadData];
 }
